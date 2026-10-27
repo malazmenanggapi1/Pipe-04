@@ -1,0 +1,1590 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#090d0e">
+<meta name="description" content="Prototipe horor 3D offline tentang pekerja pemeliharaan saluran kota.">
+<title>SALURAN 04 V13 — Shift Malam</title>
+<style>
+:root{color-scheme:dark;--ink:#e1e6df;--muted:#8e9a94;--panel:rgba(8,13,14,.84);--line:rgba(197,211,199,.19);--accent:#d7a85b;--cold:#7eaaa5;--danger:#b86d5b;--safe-bottom:env(safe-area-inset-bottom,0px);--safe-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070b0c;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;touch-action:none;overscroll-behavior:none}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}#gameRoot{position:fixed;inset:0;overflow:hidden;background:#070b0c}#gameCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:0}#lookPad{position:absolute;z-index:2;right:0;top:12%;width:58%;height:68%;touch-action:none;background:transparent}#vignette{position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse at center,transparent 36%,rgba(0,0,0,calc(.28 + var(--dread,0)*.22)) 77%,rgba(0,0,0,calc(.72 + var(--dread,0)*.2)) 150%)}#grain{position:absolute;inset:-50%;z-index:4;pointer-events:none;opacity:.075;background-image:repeating-radial-gradient(circle at 23% 41%,rgba(255,255,255,.55) 0 1px,transparent 1px 4px);background-size:7px 9px;animation:grainShift .22s steps(2) infinite}#flicker{position:absolute;inset:0;z-index:3;pointer-events:none;background:rgba(177,197,176,.025);animation:lightFlicker 7.5s infinite}
+@keyframes grainShift{0%{transform:translate(0,0)}25%{transform:translate(2%,-1%)}50%{transform:translate(-1%,2%)}75%{transform:translate(1%,1%)}100%{transform:translate(-2%,-1%)}}@keyframes lightFlicker{0%,6%,8%,51%,52%,100%{opacity:.23}7%,51.5%{opacity:.03}83%{opacity:.16}84%{opacity:.04}85%{opacity:.22}}
+.hud{position:absolute;z-index:6;pointer-events:none}.hud button,.hud input,.hud .interactive{pointer-events:auto}.topLeft{top:calc(16px + var(--safe-top));left:calc(16px + var(--safe-top));max-width:min(360px,70vw)}.eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--cold);font-weight:700}.objectiveBox{margin-top:9px;padding:11px 13px 12px;background:linear-gradient(90deg,rgba(5,10,11,.78),rgba(5,10,11,.08));border-left:2px solid var(--accent);text-shadow:0 1px 7px #000}.objectiveLabel{font-size:10px;letter-spacing:.18em;color:#aab6af;text-transform:uppercase;margin-bottom:5px}.objectiveText{font-size:13px;font-weight:650;line-height:1.35}.objectiveHint{font-size:11px;color:#a6b1aa;margin-top:5px;line-height:1.35}.stepMarker{display:inline-block;width:6px;height:6px;background:var(--accent);margin-right:7px;vertical-align:2px;box-shadow:0 0 10px rgba(215,168,91,.55)}.topRight{top:calc(16px + var(--safe-top));right:calc(14px + var(--safe-top));display:flex;align-items:center;gap:9px}.statusChip{padding:8px 10px;border:1px solid var(--line);background:rgba(5,10,11,.56);font-size:10px;letter-spacing:.12em;color:#bec8bf;text-transform:uppercase;backdrop-filter:blur(6px)}.statusDot{display:inline-block;width:5px;height:5px;background:#8aa99d;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #7ba89a}.soundButton{border:1px solid var(--line);background:rgba(5,10,11,.68);padding:8px 10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;min-height:32px}.soundButton:active,.flatButton:active,.actionButton:active{transform:translateY(1px)}.fullscreenButton{border:1px solid var(--line);background:rgba(5,10,11,.68);padding:8px 10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;min-height:32px;white-space:nowrap}.fullscreenButton:active{transform:translateY(1px)}.mapButton{border:1px solid var(--line);background:rgba(5,10,11,.68);padding:8px 10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;min-height:32px;white-space:nowrap}.mapButton:active{transform:translateY(1px)}
+#mapOverlay{position:absolute;z-index:9;top:58px;right:12px;width:min(350px,calc(100vw - 24px));max-height:calc(100dvh - 72px);overflow-y:auto;padding:13px;border:1px solid rgba(190,208,195,.25);border-top:2px solid var(--accent);background:rgba(5,10,11,.94);box-shadow:0 18px 50px #0009;backdrop-filter:blur(10px)}#mapOverlay[hidden]{display:none}.mapHead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.mapTitle{font-size:10px;font-weight:800;letter-spacing:.2em;color:#d7dfd6}.mapClose{border:1px solid var(--line);background:rgba(255,255,255,.04);padding:5px 8px;font-size:9px;letter-spacing:.1em}.mapSvg{display:block;width:100%;height:auto;border:1px solid rgba(190,208,195,.1);background:#080e0e}.mapLegend{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:9px;letter-spacing:.08em;color:#91a096;margin-top:9px}.mapLegend span:before{content:"";display:inline-block;width:7px;height:7px;margin-right:5px;background:var(--accent);border-radius:50%}.mapLegend span:nth-child(3):before{background:#718780;border-radius:0}.mapLegend span:last-child:before{content:"↓";color:#8ab4a3;background:transparent;border-radius:0;font-weight:900;width:8px;height:8px;line-height:8px}
+#reticle{position:absolute;z-index:5;left:50%;top:50%;width:13px;height:13px;transform:translate(-50%,-50%);pointer-events:none;opacity:.8}#reticle:before,#reticle:after{content:"";position:absolute;background:rgba(223,231,221,.78);box-shadow:0 0 4px #000}#reticle:before{width:1px;height:13px;left:6px;top:0}#reticle:after{height:1px;width:13px;left:0;top:6px}#reticle.active:before,#reticle.active:after{background:var(--accent);box-shadow:0 0 7px rgba(215,168,91,.8)}
+#targetPrompt{position:absolute;z-index:6;left:50%;top:calc(50% + 27px);transform:translateX(-50%);min-width:160px;max-width:85vw;padding:7px 10px;border:1px solid rgba(215,168,91,.42);background:rgba(5,9,9,.78);text-align:center;font-size:10px;font-weight:700;letter-spacing:.16em;color:#f0d6a6;opacity:0;transition:opacity .12s;pointer-events:none;text-shadow:0 1px 4px #000}#targetPrompt.visible{opacity:1}
+#dialoguePanel{position:absolute;z-index:10;left:50%;bottom:calc(22px + var(--safe-bottom));transform:translateX(-50%);width:min(760px,calc(100% - 28px));border:1px solid rgba(180,202,191,.26);border-left:3px solid var(--cold);background:linear-gradient(110deg,rgba(5,10,11,.96),rgba(10,17,17,.88));box-shadow:0 16px 50px rgba(0,0,0,.48);padding:14px 16px 13px;backdrop-filter:blur(10px)}#dialoguePanel[hidden]{display:none}.speakerLine{font-size:10px;color:var(--cold);font-weight:800;letter-spacing:.2em;text-transform:uppercase;margin-bottom:7px}.dialogueText{font-size:clamp(14px,2.5vw,17px);line-height:1.55;min-height:2.8em;white-space:pre-wrap}.dialogueFooter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}.dialogueNote{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#84938b}.flatButton{border:1px solid rgba(215,168,91,.54);background:rgba(215,168,91,.1);padding:9px 14px;font-size:10px;letter-spacing:.16em;font-weight:800;text-transform:uppercase;min-width:102px}
+#actionButton{position:absolute;z-index:8;right:calc(22px + var(--safe-top));bottom:calc(34px + var(--safe-bottom));width:82px;height:82px;border-radius:50%;border:1px solid rgba(215,168,91,.62);background:radial-gradient(circle at 50% 35%,rgba(213,175,109,.23),rgba(5,9,9,.88) 68%);box-shadow:0 0 0 6px rgba(10,15,15,.24),inset 0 0 20px rgba(215,168,91,.08);font-size:10px;letter-spacing:.13em;font-weight:800;color:#efd7ad;pointer-events:auto;touch-action:manipulation}#actionButton:disabled{opacity:.45;color:#8a948c;border-color:rgba(197,211,199,.22);filter:grayscale(.8)}#actionButton .keyHint{display:block;font-size:9px;color:#87938a;margin-top:4px;font-weight:500;letter-spacing:.08em}#actionProgress{position:absolute;z-index:7;right:calc(16px + var(--safe-top));bottom:calc(128px + var(--safe-bottom));width:160px;background:rgba(5,9,9,.8);border:1px solid var(--line);padding:9px 10px;display:none}#actionProgress.visible{display:block}.progressLabel{font-size:9px;letter-spacing:.13em;margin-bottom:7px;color:#c6d0c8}.progressTrack{height:3px;background:rgba(225,230,223,.16)}.progressFill{height:100%;width:0;background:var(--accent);box-shadow:0 0 8px rgba(215,168,91,.4)}
+#joystick{position:absolute;z-index:8;left:calc(18px + var(--safe-top));bottom:calc(24px + var(--safe-bottom));width:112px;height:112px;border-radius:50%;border:1px solid rgba(191,207,194,.2);background:radial-gradient(circle,rgba(166,185,171,.08),rgba(3,7,7,.28));pointer-events:auto;touch-action:none;display:flex;align-items:center;justify-content:center}#joyRing{position:absolute;width:74px;height:74px;border:1px solid rgba(191,207,194,.18);border-radius:50%}#joyKnob{position:absolute;width:40px;height:40px;border:1px solid rgba(208,220,210,.45);border-radius:50%;background:radial-gradient(circle at 35% 28%,rgba(168,192,175,.42),rgba(16,27,26,.8));box-shadow:0 4px 15px #0007;transform:translate(0,0)}#joyCaption{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-size:8px;letter-spacing:.2em;color:#88958d;text-shadow:0 1px 4px #000}
+#helpText{position:absolute;z-index:6;left:50%;bottom:calc(12px + var(--safe-bottom));transform:translateX(-50%);color:rgba(223,231,221,.52);font-size:9px;letter-spacing:.14em;text-transform:uppercase;text-align:center;white-space:nowrap;pointer-events:none}
+#menuOverlay,#endOverlay,#errorOverlay{position:absolute;z-index:20;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(90deg,rgba(2,6,7,.88) 0%,rgba(2,6,7,.58) 53%,rgba(2,6,7,.25) 100%),linear-gradient(0deg,rgba(2,6,7,.78),transparent 65%)}#menuOverlay[hidden],#endOverlay[hidden],#errorOverlay[hidden]{display:none}.menuCard{width:min(600px,100%);margin-left:max(0px,4vw);margin-right:auto;padding:clamp(20px,5vw,42px);border:1px solid rgba(190,208,195,.18);border-top:2px solid var(--accent);background:linear-gradient(140deg,rgba(6,12,13,.88),rgba(6,12,13,.42));box-shadow:0 20px 80px #0005;backdrop-filter:blur(8px)}.gameWordmark{font-size:clamp(36px,8vw,76px);line-height:.9;font-weight:850;letter-spacing:-.055em;margin:13px 0 0;text-shadow:0 5px 25px #000}.gameWordmark span{display:block;color:var(--accent);font-size:.42em;letter-spacing:.26em;margin-top:15px;font-weight:700}.menuDescription{max-width:430px;color:#aab5ad;font-size:13px;line-height:1.6;margin:22px 0 18px}.menuRule{height:1px;background:linear-gradient(90deg,rgba(215,168,91,.6),transparent);margin:20px 0}.controlsTitle{color:#d5ded6;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:9px}.controlLines{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;color:#9ba69e;font-size:11px;line-height:1.45}.controlLines strong{color:#d3ddd3;font-weight:700}.startButton{margin-top:22px;width:100%;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(215,168,91,.7);background:linear-gradient(100deg,rgba(215,168,91,.2),rgba(215,168,91,.06));padding:15px 16px;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.startButton .arrow{font-size:18px;color:var(--accent)}.menuFoot{display:flex;justify-content:space-between;gap:10px;margin-top:13px;color:#78867d;font-size:9px;letter-spacing:.12em;text-transform:uppercase}.soundRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:10px;color:#a1ada4;letter-spacing:.1em;text-transform:uppercase}.soundRow button{border:1px solid var(--line);background:#0c1515;padding:7px 9px;font-size:9px;letter-spacing:.1em}
+#endOverlay{background:radial-gradient(ellipse at center,rgba(6,11,12,.4),rgba(0,0,0,.93));text-align:center}#endOverlay .endCard{width:min(560px,100%);padding:30px 18px}.endEyebrow{font-size:10px;letter-spacing:.32em;color:var(--cold);text-transform:uppercase}.endTitle{font-size:clamp(30px,8vw,58px);font-weight:800;letter-spacing:.1em;margin:17px 0 11px;color:#e4e9e0}.endSubtitle{font-size:13px;line-height:1.6;max-width:370px;margin:0 auto;color:#8c9990}.endRule{width:56px;height:2px;background:var(--accent);margin:24px auto}.endButton{display:block;margin:12px auto 0;border:1px solid var(--line);background:rgba(255,255,255,.04);padding:11px 15px;font-size:10px;letter-spacing:.14em;text-transform:uppercase}.errorPanel{max-width:560px;padding:25px;background:#101718;border:1px solid var(--danger)}.errorPanel h2{font-size:22px;margin-top:0}.errorPanel p{font-size:13px;line-height:1.6;color:#bdc6be}
+#flashNotice{position:absolute;z-index:12;top:30%;left:50%;transform:translateX(-50%);font-family:ui-monospace,monospace;font-size:12px;letter-spacing:.15em;color:#f0d6a6;text-shadow:0 0 14px #000,0 0 8px #ba8750;opacity:0;pointer-events:none;text-align:center;white-space:nowrap}#flashNotice.show{animation:notice 1.7s ease both}@keyframes notice{0%{opacity:0;transform:translate(-50%,5px)}15%,75%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-4px)}}
+@media (pointer:fine){#joystick{opacity:.16;transition:opacity .2s}#joystick:hover{opacity:.8}#actionButton{width:66px;height:66px;bottom:26px;right:28px}#helpText{bottom:10px}#lookPad{width:65%;height:75%;top:10%}}
+@media(max-width:600px){.topLeft{top:calc(10px + var(--safe-top));left:calc(10px + var(--safe-top));max-width:68vw}.eyebrow{font-size:8px}.objectiveBox{padding:8px 9px;margin-top:6px}.objectiveText{font-size:11px}.objectiveLabel{font-size:8px}.objectiveHint{font-size:9px}.topRight{top:calc(10px + var(--safe-top));right:calc(8px + var(--safe-top));gap:5px}.statusChip{padding:6px 7px;font-size:8px}.soundButton,.fullscreenButton,.mapButton{padding:6px 7px;font-size:8px;min-height:28px}#mapOverlay{top:52px;right:8px;padding:10px;width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 60px)}.mapLegend{font-size:8px}.controlLines{grid-template-columns:1fr;gap:5px}.menuDescription{font-size:12px;margin:16px 0}.menuRule{margin:15px 0}.menuFoot{font-size:8px}.menuCard{margin:0;max-height:92dvh;overflow-y:auto}.gameWordmark{font-size:clamp(38px,12vw,60px)}#dialoguePanel{bottom:calc(18px + var(--safe-bottom));padding:11px 12px;width:calc(100% - 20px)}.dialogueText{font-size:14px}.dialogueNote{font-size:8px}#joystick{width:98px;height:98px;left:calc(11px + var(--safe-top));bottom:calc(20px + var(--safe-bottom))}#joyRing{width:67px;height:67px}#joyKnob{width:36px;height:36px}#actionButton{right:calc(15px + var(--safe-top));bottom:calc(25px + var(--safe-bottom));width:72px;height:72px}#actionProgress{right:calc(12px + var(--safe-top));bottom:calc(105px + var(--safe-bottom));width:144px}#helpText{font-size:8px;bottom:calc(5px + var(--safe-bottom));max-width:44vw;white-space:normal;line-height:1.4}#lookPad{width:58%;height:70%;top:13%}}
+@media(max-height:520px) and (orientation:landscape){.menuCard{padding:15px 22px;max-width:560px}.gameWordmark{font-size:42px;margin-top:8px}.menuDescription{margin:10px 0;font-size:11px}.menuRule{margin:10px 0}.startButton{padding:10px;margin-top:12px}.controlLines{font-size:10px}.objectiveHint{display:none}#dialoguePanel{bottom:10px;padding:8px 12px}.dialogueText{font-size:13px;min-height:1.7em}.dialogueFooter{margin-top:5px}#joystick{width:84px;height:84px;bottom:12px}#joyRing{width:58px;height:58px}#actionButton{width:64px;height:64px;bottom:18px}}
+#saveOverlay{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(3,7,7,.88)}#saveOverlay[hidden]{display:none}.saveCard{width:min(440px,92vw);max-height:92vh;overflow:auto;padding:16px;border:1px solid #38504a;background:#0b1413;color:#cfe0d6;font:12px/1.4 system-ui,sans-serif}.saveRow{display:flex;gap:6px;align-items:center;margin:6px 0;padding:8px;border:1px solid #1f322d}.saveRow span{flex:1;min-width:0}.saveRow small{display:block;opacity:.6;font-size:10px}.saveBtn{background:#12201d;color:#cfe0d6;border:1px solid #38504a;padding:9px 10px;font:inherit;letter-spacing:.08em}.saveBtn:disabled{opacity:.3}#saveCode{width:100%;height:60px;margin:6px 0;background:#060b0a;color:#9fb8ad;border:1px solid #25403a;font:10px monospace}#gameCanvas{transition:filter .3s}#vignette{transition:background .3s}
+#gameRoot.scare #grain{opacity:.24}#gameRoot.scare #vignette{background:radial-gradient(ellipse at center,transparent 16%,rgba(0,0,0,.6) 60%,rgba(0,0,0,.95) 118%)}#gameRoot.scare #gameCanvas{filter:contrast(1.3) saturate(.5) brightness(.96)}
+#notesOverlay{position:fixed;inset:0;z-index:41;display:flex;align-items:center;justify-content:center;background:rgba(3,7,7,.9)}#notesOverlay[hidden]{display:none}.notesCard{width:min(460px,92vw);max-height:90vh;overflow:auto;padding:16px;border:1px solid #38504a;border-top:2px solid var(--accent);background:#0b1413;color:#cfe0d6}.noteItem{margin:9px 0;padding:10px 12px;border:1px solid #25403a;border-left:3px solid var(--accent);background:#09110f}.noteItem h4{margin:0 0 6px;font-size:10px;letter-spacing:.16em;color:var(--cold);font-weight:800}.noteItem p{margin:5px 0;font-size:13px;line-height:1.55;color:#d6dfd5}.noteEmpty{opacity:.6;font-size:12px;margin:12px 0}.notesHint{font-size:10px;letter-spacing:.1em;color:#7d8b83;margin:8px 0 4px}
+.mapButton.unread{border-color:var(--accent);color:#f0d6a6;box-shadow:0 0 10px rgba(215,168,91,.4)}
+</style>
+</head>
+<body>
+<div id="gameRoot">
+  <canvas id="gameCanvas" aria-label="Dunia 3D saluran kota"></canvas>
+  <div id="lookPad" aria-label="Geser untuk melihat sekeliling"></div>
+  <div id="vignette"></div><div id="flicker"></div><div id="grain"></div>
+  <div id="hudMain" class="hud topLeft" hidden>
+    <div class="eyebrow">Unit perawatan kota <span style="color:#7a8980">/</span> jalur 04</div>
+    <div class="objectiveBox"><div class="objectiveLabel"><span class="stepMarker"></span>Tujuan saat ini</div><div id="objectiveText" class="objectiveText">Periksa pipa yang rusak.</div><div id="objectiveHint" class="objectiveHint">Sambungan di sisi kanan saluran.</div></div>
+  </div>
+  <div id="hudRight" class="hud topRight" hidden>
+    <div class="statusChip"><span class="statusDot"></span><span id="statusText">LAMPU KEPALA AKTIF</span></div>
+    <button id="soundToggle" class="soundButton" type="button" aria-label="Nyalakan atau matikan suara ambience">SUARA: MATI</button>
+    <button id="notesToggle" class="mapButton" type="button" hidden>CATATAN</button>
+    <button id="saveToggle" class="mapButton" type="button">SIMPAN</button>
+    <button id="mapToggle" class="mapButton" type="button" aria-expanded="false" aria-controls="mapOverlay">PETA</button>
+    <button id="fullscreenToggle" class="fullscreenButton" type="button" aria-label="Masuk atau keluar mode layar penuh">⛶ LAYAR PENUH</button>
+  </div>
+  <section id="mapOverlay" hidden aria-label="Peta teknis saluran">
+    <div class="mapHead"><div class="mapTitle">DENAH SERVIS · V6</div><button id="mapClose" class="mapClose" type="button">TUTUP ×</button></div>
+    <svg class="mapSvg" viewBox="48 5 330 244" role="img" aria-label="Denah teknis versi 6: koridor utama, galeri interceptor, kanal saringan di barat, bak berpagar, dua pompa, dan panel kontrol di dinding utara ruang pompa">
+      <defs>
+        <pattern id="mapGrid" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M18 0H0V18" fill="none" stroke="#294038" stroke-width=".45" opacity=".5"/></pattern>
+        <linearGradient id="mapWet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#243e39"/><stop offset="1" stop-color="#101b19"/></linearGradient>
+      </defs>
+      <rect width="360" height="254" fill="#07100f"/>
+      <rect width="360" height="254" fill="url(#mapGrid)"/>
+      <!-- World-to-plan scale: x = 180 + worldX*4.5; y = 58 - worldZ*4.5 -->
+      <g id="mapWalkable" stroke="#82948a" stroke-width="1.15" stroke-linejoin="round">
+        <rect x="164" y="22" width="32" height="112" fill="#172724"/>
+        <rect x="167.5" y="130" width="25" height="30.5" fill="#202f2a"/>
+        <rect x="148.7" y="160.6" width="62.6" height="55.5" fill="url(#mapWet)" stroke="#a0aea1" stroke-width="1.6"/>
+        <rect x="120.2" y="179.1" width="28.5" height="18.8" fill="#24352e"/>
+        <rect x="84.6" y="163.8" width="37" height="63" fill="#30291f" stroke="#b18b55" stroke-width="1.35"/>
+        <rect x="57.6" y="179.1" width="27" height="18.8" fill="#28251e" stroke="#b18b55" stroke-width="1.35"/>
+        <rect x="211.3" y="179.1" width="29.2" height="18.8" fill="#20332d"/>
+        <path d="M240.5 160.6 H278.1 V212.4 H240.5 Z" fill="#20302b" stroke="#719184"/>
+        <rect x="278.1" y="178.2" width="27.9" height="14" fill="#172824" stroke="#82a394" stroke-width="1.35"/>
+      </g>
+      <!-- Doors and structural thresholds -->
+      <g fill="none" stroke-linecap="square">
+        <path d="M164 132 V134 M196 132 V134" stroke="#a6b4aa" stroke-width="2"/>
+        <path d="M167.5 159.8 H176 M184 159.8 H192.5" stroke="#7d8e84" stroke-width="2"/>
+        <path d="M148.7 181 H151 M148.7 195 H151" stroke="#889a8e" stroke-width="2"/>
+        <path d="M211.3 181 H209 M211.3 195 H209" stroke="#889a8e" stroke-width="2"/>
+        <line id="mapGate" x1="84.6" y1="180.2" x2="84.6" y2="197.0" stroke="#c18b4c" stroke-width="3" stroke-dasharray="3 2"/>
+        <line x1="306" y1="178.5" x2="306" y2="191.8" stroke="#b7c4b9" stroke-width="2.2"/>
+      </g>
+      <!-- Main pipe and repair point -->
+      <g fill="none" stroke="#61776e" stroke-width="1.35"><path d="M190.5 30 V129"/><path d="M190.5 129 L190.5 158" stroke-dasharray="2 2"/></g>
+      <rect x="188.1" y="70.4" width="4.8" height="7.8" fill="#a84d3d" stroke="#efac8e" stroke-width=".5"/>
+      <circle cx="180" cy="20.3" r="3.2" fill="#d3ab65" stroke="#f0d7a5" stroke-width=".8"/>
+      <!-- Covered interceptor channel: the paired rails and frequent slats mark a grate over water. -->
+      <g>
+        <rect x="176.6" y="163.8" width="6.8" height="49.1" fill="#07110f" stroke="#4f655b" stroke-width=".7"/>
+        <path d="M176.6 165.5 H183.4 M176.6 212.0 H183.4" stroke="#779087" stroke-width="1.2"/>
+        <path d="M176.6 166.2 H183.4 M176.6 168.6 H183.4 M176.6 171.0 H183.4 M176.6 173.4 H183.4 M176.6 175.8 H183.4 M176.6 178.2 H183.4 M176.6 180.6 H183.4 M176.6 183.0 H183.4 M176.6 185.4 H183.4 M176.6 187.8 H183.4 M176.6 190.2 H183.4 M176.6 192.6 H183.4 M176.6 195.0 H183.4 M176.6 197.4 H183.4 M176.6 199.8 H183.4 M176.6 202.2 H183.4 M176.6 204.6 H183.4 M176.6 207.0 H183.4 M176.6 209.4 H183.4" stroke="#779087" stroke-width=".55"/>
+        <path d="M177.7 164.5 V212.6 M180 164.5 V212.6 M182.3 164.5 V212.6" stroke="#34483f" stroke-width=".55"/>
+        <path d="M180 171 V176 M178.2 174.2 L180 176 L181.8 174.2 M180 188 V193 M178.2 191.2 L180 193 L181.8 191.2" fill="none" stroke="#8ab4a3" stroke-width=".85"/>
+        <rect x="170.8" y="213.7" width="18.4" height="2.4" fill="#111a18" stroke="#6d8175" stroke-width=".7"/>
+      </g>
+      <!-- West-side screening channel; cross-racks and the unobstructed east walkway are explicit. -->
+      <g id="screenChannelPlan">
+        <rect x="85.05" y="193.45" width="11.25" height="33.30" fill="#0c1714" stroke="#8d7957" stroke-width=".65"/>
+        <path d="M87.0 194.5 V225.6 M95.0 194.5 V225.6" stroke="#65796d" stroke-width=".65"/>
+        <path d="M91.0 195.0 V225.0" stroke="#567e70" stroke-width="1.35" stroke-dasharray="2.2 1.8"/>
+        <path d="M89.2 222.7 L91.0 225.0 L92.8 222.7" fill="none" stroke="#8ab4a3" stroke-width=".8"/>
+        <g stroke="#b08a56" stroke-width=".7" fill="none">
+          <path d="M85.9 200.4 H94.9 M85.9 210.3 H94.9 M85.9 220.2 H94.9" stroke-width="1.05"/>
+          <path d="M87 199.3 V201.5 M88.2 199.3 V201.5 M89.4 199.3 V201.5 M90.6 199.3 V201.5 M91.8 199.3 V201.5 M93 199.3 V201.5 M94.2 199.3 V201.5"/>
+          <path d="M87 209.2 V211.4 M88.2 209.2 V211.4 M89.4 209.2 V211.4 M90.6 209.2 V211.4 M91.8 209.2 V211.4 M93 209.2 V211.4 M94.2 209.2 V211.4"/>
+          <path d="M87 219.1 V221.3 M88.2 219.1 V221.3 M89.4 219.1 V221.3 M90.6 219.1 V221.3 M91.8 219.1 V221.3 M93 219.1 V221.3 M94.2 219.1 V221.3"/>
+        </g>
+      </g>
+      <!-- Guarded sump, aligned to the recessed pit in the pump-room floor. -->
+      <g id="mapSump" fill="none" stroke="#829488" stroke-width=".65">
+        <rect x="245.8" y="169.6" width="9.7" height="4.5" fill="#101815" stroke="#9ba99b"/>
+        <path d="M246.5 170.4 H254.8 M246.5 173.4 H254.8 M246.5 170.4 V173.4 M254.8 170.4 V173.4"/>
+      </g>
+      <!-- Suction pipes are aligned from the wet well to each pump skid. -->
+      <path d="M249.8 171.9 V198.9 M262.8 171.9 V198.9 M249.8 171.9 H262.8" fill="none" stroke="#53665b" stroke-width="1.1" stroke-dasharray="1.3 1.2"/>
+      <!-- Pumps and panel in the east equipment bay -->
+      <g stroke="#9caf9f" stroke-width=".7">
+        <circle cx="249.8" cy="198.9" r="4.0" fill="#17231f"/><circle cx="249.8" cy="198.9" r="1.6" fill="#657b70"/>
+        <circle cx="262.8" cy="198.9" r="4.0" fill="#17231f"/><circle cx="262.8" cy="198.9" r="1.6" fill="#657b70"/>
+        <rect x="270.63" y="160.60" width="5.94" height="0.72" fill="#9c7443" stroke="#d4ad70" stroke-width=".7"/><path d="M271.2 160.96 H276.0" stroke="#d4ad70" stroke-width=".45"/>
+      </g>
+      <g font-family="system-ui,sans-serif" fill="#b7c8bb" font-size="3.5" text-anchor="middle"><text x="249.8" y="207.0">P1</text><text x="262.8" y="207.0">P2</text><text x="250.5" y="178.8" fill="#d3b078" font-size="3.1" text-anchor="middle">BAK</text><text x="273.6" y="166.2" fill="#d3b078" font-size="3.2" text-anchor="middle">PANEL</text></g>
+      <!-- Hatch at dead end of emergency tunnel -->
+      <rect x="59.5" y="184.2" width="3.7" height="8.3" fill="#171b17" stroke="#a67e4c" stroke-width=".8"/>
+      <path d="M60.7 185.2 V191.6 M62 185.2 V191.6" stroke="#6c786d" stroke-width=".65"/>
+      <!-- A gap in the south wall shows the screened channel outlet. -->
+      <path d="M85.1 226.8 H96.3" fill="none" stroke="#07100f" stroke-width="2.2"/>
+      <path d="M85.4 226.8 H96.0" fill="none" stroke="#9aaa9c" stroke-width=".65" stroke-dasharray="1.0 1.1"/>
+      <text x="90.7" y="233.5" text-anchor="middle" font-family="system-ui,sans-serif" font-size="3.7" letter-spacing=".05" fill="#8ca092">OUTLET</text>
+      <!-- Directional signifiers -->
+      <text x="52" y="13.2" font-family="system-ui,sans-serif" font-size="4.4" letter-spacing=".55" fill="#7f9488">PETA TATA LETAK · V6</text>
+      <g font-family="system-ui,sans-serif" fill="#bdc9bd" font-size="6.3" letter-spacing=".45">
+        <text x="180" y="63" text-anchor="middle" transform="rotate(-90 180 63)">KORIDOR PIPA</text>
+        <text x="180" y="151" text-anchor="middle" font-size="4.15" letter-spacing=".15">TRANSISI</text>
+        <text x="160.5" y="174" text-anchor="middle" font-size="4.8" letter-spacing=".1">GALERI</text>
+        <text x="160.5" y="181" text-anchor="middle" font-size="4.8" letter-spacing=".1">UTAMA</text>
+        <text x="102.5" y="174" text-anchor="middle" font-size="6.4" fill="#d0ad7b">SARINGAN</text>
+        <text x="102.5" y="183" text-anchor="middle" font-size="5.5" fill="#d0ad7b">KASAR</text>
+        <text x="254.5" y="185.0" text-anchor="middle" font-size="4.7">RUANG POMPA</text>
+        <text x="73.4" y="187" text-anchor="middle" font-size="3.8" letter-spacing=".02" fill="#d0ad7b">AKSES</text>
+        <text x="73.4" y="192.2" text-anchor="middle" font-size="3.8" letter-spacing=".02" fill="#d0ad7b">DARURAT</text>
+        <text x="292" y="174" text-anchor="middle" font-size="4.25" letter-spacing=".05">PINTU SERVIS</text>
+      </g>
+      <g id="mapCh3" display="none" font-family="system-ui,sans-serif" font-size="3.6" text-anchor="middle" fill="#b7c8bb">
+        <rect x="307.8" y="170.5" width="26.1" height="29.25" fill="#0e1613" stroke="#6f8176" stroke-width=".8"/><rect x="333.9" y="170.5" width="29.8" height="29.25" fill="#0e1613" stroke="#6f8176" stroke-width=".8"/>
+        <rect x="313.2" y="170.5" width="15.3" height="2.25" fill="#7b6a45"/><rect x="344.3" y="170.5" width="9.9" height="3.6" fill="#7b6a45"/><rect x="348.1" y="187" width="5.9" height="5.9" fill="none" stroke="#d3b078" stroke-width=".7"/>
+        <path d="M307.8 179.7 V190.5" stroke="#8cae83" stroke-width="1.5"/><path id="mapCtl" d="M333.9 179.7 V190.5" stroke="#c18b4c" stroke-width="3" stroke-dasharray="3 2"/>
+        <text x="321" y="186">GANTI</text><text x="349" y="182">KONTROL</text>
+      </g>
+      <g id="mapCh4" display="none" font-family="system-ui,sans-serif" font-size="4" text-anchor="middle" fill="#b7c8bb"><rect x="48" y="5" width="330" height="244" fill="#080e0e"/><rect x="207.0" y="168.2" width="37.8" height="33.8" fill="#0e1613" stroke="#6f8176" stroke-width=".8"/><rect x="243.9" y="178.1" width="85.5" height="14.0" fill="#0e1613" stroke="#6f8176" stroke-width=".8"/><rect x="329.4" y="168.2" width="35.1" height="33.8" fill="#0e1613" stroke="#6f8176" stroke-width=".8"/><rect x="245.7" y="178.1" width="81.9" height="14.0" fill="#1b3a36" opacity=".7"/><rect x="346.4" y="186.8" width="6" height="6" fill="#34403a" stroke="#d3b078" stroke-width=".7"/><rect x="218.7" y="168.5" width="3.6" height="3.6" fill="#7b6a45"/><path d="M207.0 183.1 V187.2" stroke="#c18b4c" stroke-width="3"/><path d="M230.6 168.2 H232.9" stroke="#8cae83" stroke-width="2.5"/><text x="225.9" y="180.9">RUANG KATUP</text><text x="286.6" y="174.6">LORONG BANJIR</text><text x="346.5" y="176.4">TANGGA</text><text x="120" y="14" font-size="4.4" letter-spacing=".5" fill="#7f9488">LEVEL BAWAH</text></g>
+      <g id="mapCh5" display="none" font-family="system-ui,sans-serif" font-size="3.4" text-anchor="middle" fill="#b7c8bb"><rect x="217.8" y="159.2" width="19.8" height="18.0" fill="#0e1613" stroke="#6f8176" stroke-width=".8"/><path d="M223.2 177.2 H231.3" stroke="#8cae83" stroke-width="1.5"/><rect x="229.7" y="168.5" width="4.1" height="4.0" fill="none" stroke="#d3b078" stroke-width=".7"/><text x="227.7" y="164.2">AKSES</text></g>
+      <!-- Map objective and player direction: their coordinates are updated from the 3D world -->
+      <g id="mapObjective" transform="translate(180 20)" hidden><circle r="5.4" fill="#d7a85b" opacity=".19"/><circle r="3.1" fill="#efbd69" stroke="#fff0d1" stroke-width=".8"/></g>
+      <g id="mapPlayer" transform="translate(180 31) rotate(0)"><circle r="6" fill="#d7a85b" opacity=".22"/><path d="M0 -4.4 L3.2 3 L0 1.5 L-3.2 3 Z" fill="#f1d8a6" stroke="#07100f" stroke-width=".8"/></g>
+      <g transform="translate(330 27)" fill="none" stroke="#d1dacf" stroke-width="1"><path d="M0 7 V-5 M0 -5 L-3 -1 M0 -5 L3 -1"/></g><text x="330" y="16" fill="#d1dacf" font-family="system-ui,sans-serif" font-size="7" text-anchor="middle">U</text>
+      <path d="M309 239 H331" stroke="#90a097" stroke-width="1.5"/><path d="M309 236 V242 M331 236 V242" stroke="#90a097" stroke-width="1.2"/><text x="320" y="234" text-anchor="middle" fill="#90a097" font-family="system-ui,sans-serif" font-size="6.5">5 m</text>
+    </svg>
+    <div class="mapLegend"><span>POSISI & ARAH</span><span>OBJEKTIF</span><span>GERBANG</span><span>ARAH ALIRAN</span></div>
+  </section>
+  <div id="reticle" hidden></div><div id="targetPrompt" aria-live="polite"></div>
+  <div id="flashNotice" aria-live="polite"></div>
+  <div id="actionProgress"><div id="progressLabel" class="progressLabel">MEMASANG KLEM...</div><div class="progressTrack"><div id="progressFill" class="progressFill"></div></div></div>
+  <div id="joystick" aria-label="Joystick bergerak"><div id="joyRing"></div><div id="joyKnob"></div><div id="joyCaption">GERAK</div></div>
+  <button id="actionButton" type="button" disabled>AKSI<span class="keyHint">DEKATI OBJEK</span></button>
+  <div id="helpText" hidden>GESER KANAN UNTUK MELIHAT</div>
+  <section id="dialoguePanel" hidden aria-live="polite" aria-label="Dialog teks"><div id="dialogueSpeaker" class="speakerLine">RADIO</div><div id="dialogueText" class="dialogueText"></div><div class="dialogueFooter"><span id="dialogueNote" class="dialogueNote">TRANSMISI TEKS · 01/03</span><button id="dialogueNext" class="flatButton" type="button">LANJUTKAN →</button></div></section>
+  <section id="menuOverlay" aria-label="Menu utama"><div class="menuCard"><div class="eyebrow">Catatan kerja · 02:17 dini hari</div><h1 class="gameWordmark">SALURAN <span>04 / SHIFT MALAM</span></h1><p class="menuDescription">Tugas pemeliharaan biasa di bawah kota. Temukan sambungan yang bocor, hentikan alirannya, lalu kembali ke permukaan. Tidak ada yang dijelaskan lebih dari yang perlu.</p><div class="menuRule"></div><div class="controlsTitle">Kontrol</div><div class="controlLines"><div><strong>Android</strong> — joystick kiri untuk bergerak</div><div><strong>Android</strong> — geser sisi kanan untuk menoleh</div><div><strong>AKSI</strong> — gunakan objek di dekatmu</div><div><strong>Komputer</strong> — WASD + klik/geser + E</div></div><button id="continueSave" class="startButton" type="button" hidden style="margin-bottom:8px"><span>LANJUTKAN</span><span class="arrow">↗</span></button><button id="slotsOpen" class="startButton" type="button" style="margin-bottom:8px"><span>SIMPANAN / KODE</span><span class="arrow">↗</span></button><button id="startButton" class="startButton" type="button"><span>MULAI SHIFT</span><span class="arrow">↗</span></button><div class="soundRow"><span>Audio ambience sintetis</span><button id="menuSoundToggle" type="button">SUARA: MATI</button></div><div class="menuFoot"><span>3D realtime · Dialog teks</span><span>Offline · Tanpa aset luar</span></div></div></section>
+  <section id="saveOverlay" hidden aria-label="Simpanan"><div class="saveCard"><div class="eyebrow">Simpanan</div><div id="saveRows"></div><textarea id="saveCode" placeholder="Kode simpanan (untuk pindah perangkat atau versi file)" spellcheck="false"></textarea><div class="saveRow"><button id="saveExport" class="saveBtn" type="button">EKSPOR KODE</button><button id="saveImport" class="saveBtn" type="button">IMPOR KODE</button><button id="saveClose" class="saveBtn" type="button">TUTUP</button></div></div></section>
+  <section id="notesOverlay" hidden aria-label="Catatan"><div class="notesCard"><div class="eyebrow">Catatan · jurnal para pekerja</div><div id="notesList"></div><div class="notesHint">TOMBOL N / CATATAN UNTUK MEMBUKA KAPAN SAJA</div><div class="saveRow"><button id="notesClose" class="saveBtn" type="button">TUTUP</button></div></div></section>
+  <section id="endOverlay" hidden aria-label="Akhir prototipe"><div class="endCard"><div id="endEyebrow" class="endEyebrow">Saluran 04 · Catatan dihentikan</div><div id="endTitle" class="endTitle">BERSAMBUNG</div><div id="endSubtitle" class="endSubtitle">Dari balik pintu servis terdengar ketukan—dari sisi yang seharusnya berada di luar. Peta fasilitas ini tidak menunjukkan ruangan apa pun di baliknya.</div><div class="endRule"></div><button id="continueExploreButton" class="endButton" type="button">LANJUTKAN EKSPLORASI</button><button id="restartButton" class="endButton" type="button">ULANGI SHIFT</button></div></section>
+  <section id="errorOverlay" hidden><div class="errorPanel"><h2>Perender 3D tidak tersedia</h2><p>Browser ini tidak berhasil mengaktifkan WebGL. Coba buka file ini di browser Android/desktop yang lebih baru, bukan di pratinjau dokumen. Game tidak memerlukan internet, tetapi browser tetap harus mendukung WebGL.</p></div></section>
+</div>
+<script>
+'use strict';
+
+/* Single source of truth for traversable space, thresholds and plan projection.
+   Physical shells in buildExpandedSewerMap() are built to these same dimensions. */
+const LEVEL_LAYOUT = Object.freeze({
+  map: Object.freeze({originX:180, originY:58, scale:4.5}),
+  bounds: Object.freeze({minX:-27.35,maxX:41.0,minZ:-37.45,maxZ:8.15}),
+  walkableRooms: Object.freeze({
+    mainCorridor: [-3.55,3.55,-16.8,8.02],
+    transferThroat: [-2.78,2.78,-22.72,-16.0],
+    junctionGallery: [-6.95,6.95,-35.12,-22.65],
+    westConnector: [-13.6,-6.9,-31.12,-26.88],
+    screenGallery: [-21.25,-13.0,-37.55,-23.45],
+    eastConnector: [6.9,13.6,-31.12,-26.88],
+    pumpBay: [13.25,21.9,-34.25,-22.82],
+    servicePassage: [21.8,28.0,-29.78,-26.72],
+    emergencyTunnel: [-27.25,-21.15,-31.12,-26.88],
+    ch3Door: [27.9,28.7,-29.78,-26.72],
+    ch3Locker: [28.62,34.5,-31.32,-25.18],
+    ch3Control: [34.4,40.7,-31.32,-25.18],
+    ch4A: [33.0,40.8,-31.8,-24.7],
+    ch4B: [14.0,33.4,-29.6,-26.9],
+    ch4V: [6.2,14.5,-31.8,-24.7],
+    ch5Door: [9.7,11.3,-26.95,-26.4],
+    ch5Room: [8.75,12.45,-26.4,-23.05]
+  }),
+  portals: Object.freeze({
+    mainToThroat: Object.freeze({z:-16.42,halfDepth:.30,halfWidth:2.40}),
+    throatToGallery: Object.freeze({z:-22.5,halfDepth:.25,halfWidth:2.56}),
+    sideDoors: Object.freeze([
+      Object.freeze({x:-7.6,z:-29.0,halfThickness:.28,halfOpening:2.30}),
+      Object.freeze({x: 7.6,z:-29.0,halfThickness:.28,halfOpening:2.30}),
+      Object.freeze({x:-21.4,z:-29.0,halfThickness:.30,halfOpening:2.30}),
+      Object.freeze({x:-13.2,z:-29.0,halfThickness:.30,halfOpening:2.30}),
+      Object.freeze({x: 13.4,z:-29.0,halfThickness:.30,halfOpening:2.30}),
+      Object.freeze({x: 22.2,z:-28.25,halfThickness:.30,halfOpening:1.75}),
+      Object.freeze({x: 28.4,z:-28.25,halfThickness:.34,halfOpening:.98}),
+      Object.freeze({x: 34.2,z:-28.25,halfThickness:.45,halfOpening:.85})
+    ])
+  }),
+  // Coarse collision shapes for solid fixtures. The small clearance margin
+  // gives the first-person camera a little body width, without using meshes.
+  obstacles: Object.freeze([
+    Object.freeze({id:'mainPipeRun',minX:3.20,maxX:3.78,minZ:-10.1,maxZ:8.0,clearance:.17}),
+    Object.freeze({id:'redValveWheel',minX:2.80,maxX:3.70,minZ:-6.48,maxZ:-5.68,clearance:.14}),
+    Object.freeze({id:'screenChannelWestBank',minX:-21.10,maxX:-18.55,minZ:-37.55,maxZ:-30.00,clearance:.10}),
+    Object.freeze({id:'pumpSkidA',minX:14.48,maxX:16.75,minZ:-32.10,maxZ:-30.50,clearance:.14}),
+    Object.freeze({id:'pumpSkidB',minX:17.38,maxX:19.65,minZ:-32.10,maxZ:-30.50,clearance:.14}),
+    Object.freeze({id:'guardedSump',minX:14.35,maxX:16.85,minZ:-25.95,maxZ:-24.65,clearance:.08}),
+    Object.freeze({id:'pumpControlCabinet',minX:20.08,maxX:21.52,minZ:-23.15,maxZ:-22.72,clearance:.10}),
+    Object.freeze({id:'accessShaft',minX:11.0,maxX:12.0,minZ:-25.5,maxZ:-24.5,clearance:.10}),
+    Object.freeze({id:'toolbox',minX:17.7,maxX:18.3,minZ:-23.2,maxZ:-22.8,clearance:.10}),
+    Object.freeze({id:'toolCrate',minX:2.29,maxX:2.81,minZ:-2.725,maxZ:-2.375,clearance:.10}),
+    Object.freeze({id:'lockerRow',minX:29.59,maxX:33.01,minZ:-25.5,maxZ:-25.0,clearance:.12}),
+    Object.freeze({id:'workerBench',minX:30.0,maxX:32.4,minZ:-31.45,maxZ:-30.95,clearance:.10}),
+    Object.freeze({id:'controlDesk',minX:36.5,maxX:38.7,minZ:-25.85,maxZ:-25.0,clearance:.10}),
+    Object.freeze({id:'radioTable',minX:40.05,maxX:40.75,minZ:-27.8,maxZ:-26.2,clearance:.10})
+  ])
+});
+/* ========================================================================
+   SALURAN 04 V6 — single-file offline horror prototype
+   Architecture: Renderer / SceneBuilder / InputController / AudioSystem /
+                 DialogueSystem / ObjectiveSystem / GameController
+   No network calls, imports, external models, fonts, images or audio files.
+   ======================================================================== */
+
+const NOTES={n1:[{speaker:'CATATAN · SHIFT 03',text:'"Ketukan mulai lewat tengah malam. Tiga kali, jeda, tiga kali. Mandor bilang itu pipa memuai."'},{speaker:'CATATAN · SHIFT 03',text:'Di bawahnya ada tulisan tangan lain: "Pipa tidak memuai karena kedinginan."'},{speaker:'CATATAN · SHIFT 03',text:'Di tepi kertas: "Mulai setelah pompa timur dinyalakan. Selalu setelah itu."'}],
+  n2:[{speaker:'CATATAN · LOKER 07',text:'"Jangan jawab ketukannya. Kalau radio memanggil namamu dua kali, itu bukan mandor."'}],
+  n3:[{speaker:'RADIO · CATATAN',text:'Radio di ruang kontrol mengulang transmisi pertama persis, sampai jeda napasnya: "Pipa saluran timur. Sambungan dekat katup merah pecah."'},{speaker:'RADIO · CATATAN',text:'Kabel radio itu terputus, tetapi ia tetap bicara. Setiap kali ia bicara, dengung pompa terdengar makin keras.'}]};
+const NOTE_TITLES={n1:'SHIFT 03 · BANGKU RUANG GANTI',n2:'LOKER 07 · LOKER KUNING',n3:'RADIO · RUANG KONTROL'};
+const L2_OBS=[{minX:37.55,maxX:38.35,minZ:-29.65,maxZ:-28.95,clearance:.10},{minX:8.6,maxX:9.4,minZ:-25.35,maxZ:-24.55,clearance:.10},{minX:11.1,maxX:11.9,minZ:-24.6,maxZ:-24.5,clearance:.12},
+  {minX:14.2,maxX:14.6,minZ:-32.4,maxZ:-29.8,clearance:.10},{minX:14.2,maxX:14.6,minZ:-26.7,maxZ:-24.1,clearance:.10},
+  {minX:32.8,maxX:33.2,minZ:-32.4,maxZ:-29.8,clearance:.10},{minX:32.8,maxX:33.2,minZ:-26.7,maxZ:-24.1,clearance:.10}];
+const CONFIG = Object.freeze({
+  fov: 66 * Math.PI / 180,
+  near: 0.08,
+  far: 32,
+  maxPixelRatio: 1.25,
+  moveSpeed: 2.45,
+  mouseSensitivity: 0.0046,
+  touchSensitivity: 0.0044,
+  minPitch: -1.15,
+  maxPitch: 1.18,
+  // Bounds are aligned to MAP_LAYOUT / canOccupy and the physical room shells.
+  worldMinX: LEVEL_LAYOUT.bounds.minX,
+  worldMaxX: LEVEL_LAYOUT.bounds.maxX,
+  worldMinZ: LEVEL_LAYOUT.bounds.minZ,
+  worldMaxZ: LEVEL_LAYOUT.bounds.maxZ,
+  repairSeconds: 2.45
+});
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('gameCanvas');
+const ui = {
+  menu: $('menuOverlay'), end: $('endOverlay'), error: $('errorOverlay'),
+  endEyebrow: $('endEyebrow'), endTitle: $('endTitle'), endSubtitle: $('endSubtitle'),
+  hud: $('hudMain'), hudRight: $('hudRight'), objective: $('objectiveText'),
+  hint: $('objectiveHint'), status: $('statusText'), reticle: $('reticle'),
+  target: $('targetPrompt'), action: $('actionButton'), progress: $('actionProgress'),
+  progressLabel: $('progressLabel'), progressFill: $('progressFill'), help: $('helpText'),
+  dialogue: $('dialoguePanel'), speaker: $('dialogueSpeaker'), text: $('dialogueText'),
+  note: $('dialogueNote'), next: $('dialogueNext'), sound: $('soundToggle'), menuSound: $('menuSoundToggle'),
+  start: $('startButton'), restart: $('restartButton'), continueExplore:$('continueExploreButton'), fullscreen: $('fullscreenToggle'), mapToggle:$('mapToggle'), mapOverlay:$('mapOverlay'), mapClose:$('mapClose'), mapPlayer:$('mapPlayer'), mapObjective:$('mapObjective'), mapGate:$('mapGate'), joystick: $('joystick'), joyKnob: $('joyKnob'),
+  lookPad: $('lookPad'), flashNotice: $('flashNotice')
+};
+
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const length3 = (x,y,z) => Math.hypot(x,y,z);
+const normalize3 = (v) => { const l = Math.hypot(v[0],v[1],v[2]) || 1; return [v[0]/l,v[1]/l,v[2]/l]; };
+
+/* Minimal column-major 4x4 math keeps the standalone file dependency-free. */
+const Mat4 = {
+  identity(){ return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]); },
+  multiply(a,b){
+    const out=new Float32Array(16);
+    for(let c=0;c<4;c++) for(let r=0;r<4;r++) {
+      out[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];
+    }
+    return out;
+  },
+  translation(x,y,z){ const m=this.identity();m[12]=x;m[13]=y;m[14]=z;return m; },
+  scale(x,y,z){ const m=this.identity();m[0]=x;m[5]=y;m[10]=z;return m; },
+  rotateX(a){const c=Math.cos(a),s=Math.sin(a),m=this.identity();m[5]=c;m[6]=s;m[9]=-s;m[10]=c;return m;},
+  rotateY(a){const c=Math.cos(a),s=Math.sin(a),m=this.identity();m[0]=c;m[2]=-s;m[8]=s;m[10]=c;return m;},
+  rotateZ(a){const c=Math.cos(a),s=Math.sin(a),m=this.identity();m[0]=c;m[1]=s;m[4]=-s;m[5]=c;return m;},
+  perspective(fov,aspect,near,far){
+    const f=1/Math.tan(fov/2),nf=1/(near-far),m=new Float32Array(16);
+    m[0]=f/aspect;m[5]=f;m[10]=(far+near)*nf;m[11]=-1;m[14]=2*far*near*nf;return m;
+  },
+  lookAt(eye,target,up=[0,1,0]){
+    const z=normalize3([eye[0]-target[0],eye[1]-target[1],eye[2]-target[2]]);
+    const x=normalize3([up[1]*z[2]-up[2]*z[1],up[2]*z[0]-up[0]*z[2],up[0]*z[1]-up[1]*z[0]]);
+    const y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+    const m=new Float32Array(16);
+    m[0]=x[0];m[1]=y[0];m[2]=z[0];m[3]=0;
+    m[4]=x[1];m[5]=y[1];m[6]=z[1];m[7]=0;
+    m[8]=x[2];m[9]=y[2];m[10]=z[2];m[11]=0;
+    m[12]=-(x[0]*eye[0]+x[1]*eye[1]+x[2]*eye[2]);
+    m[13]=-(y[0]*eye[0]+y[1]*eye[1]+y[2]*eye[2]);
+    m[14]=-(z[0]*eye[0]+z[1]*eye[1]+z[2]*eye[2]);m[15]=1;return m;
+  }
+};
+
+/* Meshes are baked into world-space batches: only two draw calls per frame. */
+function makeBoxGeometry(){
+  const p=[],n=[];
+  const faces=[
+    {normal:[1,0,0],v:[[.5,-.5,-.5],[.5,.5,-.5],[.5,.5,.5],[.5,-.5,.5]]},
+    {normal:[-1,0,0],v:[[-.5,-.5,.5],[-.5,.5,.5],[-.5,.5,-.5],[-.5,-.5,-.5]]},
+    {normal:[0,1,0],v:[[-.5,.5,-.5],[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5]]},
+    {normal:[0,-1,0],v:[[-.5,-.5,.5],[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5]]},
+    {normal:[0,0,1],v:[[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5]]},
+    {normal:[0,0,-1],v:[[.5,-.5,-.5],[-.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5]]}
+  ];
+  for(const f of faces){const order=[0,1,2,0,2,3];for(const i of order){p.push(...f.v[i]);n.push(...f.normal);}}
+  return {positions:new Float32Array(p),normals:new Float32Array(n),count:p.length/3};
+}
+function makeCylinderGeometry(segments=14){
+  const p=[],n=[];
+  for(let i=0;i<segments;i++){
+    const a=i/segments*Math.PI*2,b=(i+1)/segments*Math.PI*2;
+    const x1=Math.cos(a)*.5,z1=Math.sin(a)*.5,x2=Math.cos(b)*.5,z2=Math.sin(b)*.5;
+    const n1=normalize3([x1,0,z1]),n2=normalize3([x2,0,z2]);
+    const verts=[[x1,-.5,z1],[x1,.5,z1],[x2,.5,z2],[x1,-.5,z1],[x2,.5,z2],[x2,-.5,z2]];
+    const norms=[n1,n1,n2,n1,n2,n2];
+    for(let j=0;j<6;j++){p.push(...verts[j]);n.push(...norms[j]);}
+    // Top and bottom caps. Triangles have individual flat normals.
+    p.push(0,.5,0,x2,.5,z2,x1,.5,z1);n.push(0,1,0,0,1,0,0,1,0);
+    p.push(0,-.5,0,x1,-.5,z1,x2,-.5,z2);n.push(0,-1,0,0,-1,0,0,-1,0);
+  }
+  return {positions:new Float32Array(p),normals:new Float32Array(n),count:p.length/3};
+}
+function makeTorusGeometry(major=.43,tube=.065,segments=18,tubeSegments=6){
+  const p=[],n=[];
+  const point=(u,v)=>[(major+tube*Math.cos(v))*Math.cos(u),(major+tube*Math.cos(v))*Math.sin(u),tube*Math.sin(v)];
+  for(let i=0;i<segments;i++) for(let j=0;j<tubeSegments;j++){
+    const u0=i/segments*Math.PI*2,u1=(i+1)/segments*Math.PI*2,v0=j/tubeSegments*Math.PI*2,v1=(j+1)/tubeSegments*Math.PI*2;
+    const pts=[point(u0,v0),point(u1,v0),point(u1,v1),point(u0,v0),point(u1,v1),point(u0,v1)];
+    for(const q of pts){p.push(...q);n.push(...normalize3([q[0]-major*Math.cos(Math.atan2(q[1],q[0])),q[1]-major*Math.sin(Math.atan2(q[1],q[0])),q[2]]));}
+  }
+  return {positions:new Float32Array(p),normals:new Float32Array(n),count:p.length/3};
+}
+const GEOMETRY={box:makeBoxGeometry(),cylinder:makeCylinderGeometry(14),torus:makeTorusGeometry()};
+function hexColor(hex){const s=hex.replace('#','');return [parseInt(s.slice(0,2),16)/255,parseInt(s.slice(2,4),16)/255,parseInt(s.slice(4,6),16)/255];}
+
+class SceneBuilder {
+  constructor(){this.staticData={p:[],n:[],c:[],g:[]};this.waterData={p:[],n:[],c:[],g:[]};this.repairData={p:[],n:[],c:[],g:[]};}
+  add(kind,pos,scale,color,rot=[0,0,0],glow=0,water=false,repair=false){if(!SceneBuilder.raw&&kind==='box'&&glow>0&&scale[1]>.05&&scale[1]<.06&&(pos[1]>3.7||pos[1]<-1)){SceneBuilder.lamps.push({k:kind,p:pos.slice(),s:scale.slice(),c:color,r:rot.slice(),g:glow});return;}
+    const geo=GEOMETRY[kind],data=repair?this.repairData:(water?this.waterData:this.staticData);
+    let model=Mat4.translation(...pos);
+    model=Mat4.multiply(model,Mat4.rotateY(rot[1]||0));
+    model=Mat4.multiply(model,Mat4.rotateX(rot[0]||0));
+    model=Mat4.multiply(model,Mat4.rotateZ(rot[2]||0));
+    model=Mat4.multiply(model,Mat4.scale(...scale));
+    const rotation=Mat4.multiply(Mat4.multiply(Mat4.rotateY(rot[1]||0),Mat4.rotateX(rot[0]||0)),Mat4.rotateZ(rot[2]||0));
+    const col=hexColor(color);
+    for(let i=0;i<geo.count;i++){
+      const k=i*3,x=geo.positions[k],y=geo.positions[k+1],z=geo.positions[k+2];
+      data.p.push(model[0]*x+model[4]*y+model[8]*z+model[12],model[1]*x+model[5]*y+model[9]*z+model[13],model[2]*x+model[6]*y+model[10]*z+model[14]);
+      const nx=geo.normals[k]/scale[0],ny=geo.normals[k+1]/scale[1],nz=geo.normals[k+2]/scale[2];
+      let tx=rotation[0]*nx+rotation[4]*ny+rotation[8]*nz,ty=rotation[1]*nx+rotation[5]*ny+rotation[9]*nz,tz=rotation[2]*nx+rotation[6]*ny+rotation[10]*nz;
+      const len=Math.hypot(tx,ty,tz)||1;data.n.push(tx/len,ty/len,tz/len);data.c.push(...col);data.g.push(glow);
+    }
+  }
+  box(p,s,c,r=[0,0,0],g=0,w=false,rep=false){this.add('box',p,s,c,r,g,w,rep);}
+  cylinder(p,s,c,r=[0,0,0],g=0,w=false,rep=false){this.add('cylinder',p,s,c,r,g,w,rep);}
+  torus(p,s,c,r=[0,0,0],g=0,w=false,rep=false){this.add('torus',p,s,c,r,g,w,rep);}
+}
+
+function buildSewerScene(){
+  const b=new SceneBuilder();
+  const concrete='#303b39',concrete2='#222d2c',dark='#111a1a',edge='#4a5750',metal='#4d5954',rust='#694438',yellow='#b18b4e',pipe='#65716b';
+  // Main corridor shell. Long box meshes keep this scene deliberately low-poly.
+  b.box([0,-.22,-2.6],[8.45,.44,27.8],'#202927');
+  // Ceiling slabs leave a real 1.9 x 1.9 m opening above the access ladder.
+  // The hatch panel and frame cover the opening visually while closed.
+  b.box([-2.5875,4.12,-2.6],[3.275,.36,27.8],'#121b1a');
+  b.box([ 2.5875,4.12,-2.6],[3.275,.36,27.8],'#121b1a');
+  b.box([0,4.12,-4.525],[1.9,.36,23.95],'#121b1a');
+  b.box([0,4.12,10.325],[1.9,.36,1.95],'#121b1a');
+  b.box([-4.22,1.95,-2.6],[.48,4.05,27.8],concrete2);
+  b.box([4.22,1.95,-2.6],[.48,4.05,27.8],'#26322f');
+  // The old end wall is now an open framed passage into a newly built service section.
+  b.box([-3.33,1.95,-16.42],[1.79,4.05,.5],'#202927');b.box([3.33,1.95,-16.42],[1.79,4.05,.5],'#202927');b.box([0,3.62,-16.42],[4.9,.72,.5],'#202927');
+  b.box([0,1.95,11.28],[8.45,4.05,.5],'#26312e');
+  // Concrete segment ribs, ledges and drainage gutters.
+  for(let z=-14.5;z<=9.2;z+=3.15){
+    b.box([-3.91,2.0,z],[.13,3.75,.22],'#394641');b.box([3.91,2.0,z],[.13,3.75,.22],'#3b4741');
+    // The cross-rib at z=7.55 is split around the access-hatch aperture.
+    if(Math.abs(z-7.55)<.05){
+      b.box([-2.475,3.88,z],[3.05,.15,.22],'#3b4740');
+      b.box([ 2.475,3.88,z],[3.05,.15,.22],'#3b4740');
+    }else{
+      b.box([0,3.88,z],[8.0,.15,.22],'#3b4740');
+    }
+    b.box([-3.7,.16,z],[.25,.28,.45],'#313c38');b.box([3.7,.16,z],[.25,.28,.45],'#313c38');
+  }
+  b.box([-3.67,.045,-2.6],[.24,.08,27.5],'#101918');b.box([3.67,.045,-2.6],[.24,.08,27.5],'#101918');
+  // Damp floor plates, tiny cracks and puddles. No image textures are used.
+  for(let i=0;i<26;i++){
+    const z=-14.2+i*0.96;
+    const x=-3.0+((i*37)%59)/10;
+    b.box([x,.012,z],[.42+((i%3)*.16),.018,.025+((i%2)*.018)],i%3?'#303b37':'#3a4540',[0,((i%5)-2)*.045,((i%3)-1)*.025]);
+  }
+  const puddles=[[-1.3,-8.1,1.2,.55],[.85,-5.0,1.5,.62],[-2.3,-1.4,.75,.35],[1.3,2.9,1.1,.42],[-.4,6.0,1.35,.5],[2.3,-10.3,.85,.36]];
+  for(const [x,z,sx,sz] of puddles){b.box([x,.018,z],[sx,.02,sz],'#293a39',[0,0,0]);b.box([x-.08,.031,z-.04],[sx*.34,.008,sz*.28],'#354644');}
+  // Left-wall conduit: one continuous overhead run with wall brackets that physically meet it.
+  b.cylinder([-3.82,3.12,-2.7],[.075,23.6,.075],'#5b655f',[Math.PI/2,0,0]);
+  for(let z=-13;z<9;z+=2.55){
+    b.box([-3.90,3.04,z],[.30,.10,.18],'#59635b');
+  }
+  for(const [z,y] of [[-11,1.2],[-4,2.2],[1,1.55],[5,2.5]]){
+    b.box([-3.91,y,z],[.12,.54,.7],'#172221');b.box([-3.83,y+.12,z],[.05,.09,.5],'#53635b');
+    b.box([-3.82,y-.1,z+.08],[.045,.035,.22],'#7b6544');
+  }
+  // Ceiling lights and fixtures: glow is shader-driven, not external lighting assets.
+  for(const z of [-12.2,-6.0,.4,6.7]){
+    b.box([0,3.87,z],[1.1,.12,.35],'#27332e');
+    b.box([0,3.79,z],[.62,.045,.18],z===.4?'#ad9a70':'#82958a',[0,0,0],z===.4?.27:.1);
+    b.box([-1.05,3.78,z],[.045,.28,.045],'#47554c');b.box([1.05,3.78,z],[.045,.28,.045],'#47554c');
+  }
+  // Pipe on the right wall: interrupted coupling and repair zone at z ~= -3.3.
+  b.cylinder([3.48,1.43,-6.875],[.52,6.25,.52],pipe,[Math.PI/2,0,0]);
+  b.cylinder([3.48,1.43,2.525],[.52,10.95,.52],pipe,[Math.PI/2,0,0]);
+  for(const z of [-9.7,-8.9,-7.0,-5.2,-4.08,-2.62,-.75,1.2,3.1,5.3,7.4]){
+    // Support saddles under pipe.
+    b.box([3.84,1.17,z],[.32,.16,.15],'#34423d');
+  }
+  for(const z of [-4.05,-2.66]){
+    b.cylinder([3.48,1.43,z],[.64,.22,.64],rust,[Math.PI/2,0,0]);
+    b.cylinder([3.48,1.43,z],[.68,.045,.68],'#906343',[Math.PI/2,0,0]);
+  }
+  b.box([3.51,1.42,-3.36],[.25,.1,.82],'#172321',[0,0,.08]);
+  // Red wheel valve before the broken segment.
+  const valve=[3.23,1.43,-6.08];
+  b.cylinder([3.38,1.43,-6.08],[.31,.18,.31],'#6b5140',[0,0,Math.PI/2]);
+  b.cylinder([3.29,1.43,-6.08],[.15,.22,.15],'#8e5949',[0,0,Math.PI/2]);
+  b.torus([3.23,1.43,-6.08],[.68,.68,.68],'#a64f3f',[0,Math.PI/2,0]);
+  b.box([3.23,1.43,-6.08],[.58,.052,.052],'#c37b56',[0,Math.PI/2,0]);
+  b.box([3.23,1.43,-6.08],[.052,.58,.052],'#c37b56',[0,Math.PI/2,0]);
+  b.cylinder([3.22,1.43,-6.08],[.16,.14,.16],'#a34d3b',[0,0,Math.PI/2]);
+  b.box([3.74,1.84,-6.08],[.34,.1,.1],'#4b5b53');
+  // Rust trails below the leak and blue water arcs, visible only while water is running.
+  b.box([3.64,1.08,-3.22],[.07,.62,.38],'#5a4031',[0,0,.09]);
+  for(let i=0;i<11;i++){
+    const x=3.18+(i%4)*.11,z=-3.42+Math.floor(i/4)*.12,y=1.35-(i%5)*.11;
+    b.cylinder([x,y,z],[.045,.13+(i%3)*.06,.045],'#638c88',[.17,(i%4)*.4,.32],.12,true);
+  }
+  for(let i=0;i<9;i++){
+    const x=2.8+(i%3)*.24,z=-3.6+Math.floor(i/3)*.18;
+    b.box([x,.045,z],[.22+((i%2)*.1),.013,.13],'#34504b',[0,(i%3)*.15,0],.08,true);
+  }
+  // Clamp sleeve is rendered only after the repair action succeeds.
+  b.cylinder([3.48,1.43,-3.35],[.59,.82,.59],'#879087',[Math.PI/2,0,0],.03,false,true);
+  b.cylinder([3.48,1.43,-3.35],[.63,.09,.63],'#9ba399',[Math.PI/2,0,0],.07,false,true);
+  // Work bag/tool silhouette near the service point (not an inventory puzzle).
+  b.box([2.55,.25,-2.55],[.52,.42,.35],'#3d4842',[0,.1,0]);
+  b.box([2.55,.49,-2.55],[.28,.08,.25],'#5a6257');
+  b.cylinder([2.38,.55,-2.48],[.055,.54,.055],'#7a6650',[0,0,.08]);
+  b.box([2.68,.55,-2.55],[.26,.04,.06],'#a38a5d',[0,.15,.12]);
+  // Back ladder and ceiling access hatch. The hatch is the exit interaction target.
+  for(const x of [-.43,.43]){
+    // Rails now extend from the walking surface to the upper access opening.
+    b.cylinder([x,1.82,8.67],[.095,3.58,.095],'#586660',[0,0,0]);
+    b.box([x,3.54,8.67],[.22,.12,.16],'#303d37');
+  }
+  for(let y=.12;y<=3.52;y+=.34) b.cylinder([0,y,8.67],[.065,.82,.065],'#68766e',[0,0,Math.PI/2]);
+  b.box([0,3.84,8.4],[1.68,.16,1.62],'#303b37');
+  b.box([0,3.74,8.4],[1.43,.045,1.36],'#111a19');
+  b.box([0,3.72,8.4],[1.2,.06,.06],'#626b61');
+  b.box([0,3.72,8.4],[.06,.06,1.15],'#626b61');
+  for(const x of [-.92,.92]) b.box([x,3.82,8.4],[.08,.2,1.85],'#626e64');
+  const expansion = buildExpandedSewerMap(b);
+
+  // Small painted warning blocks, stains, and bolts to give surfaces scale.
+  for(let i=0;i<8;i++){
+    b.box([-3.965,.66+i*.16,-1.0],[.025,.07,.22],i%2?'#9d7b45':'#4b544b');
+    b.box([3.965,.6+i*.18,-9.2],[.025,.06,.24],i%2?'#987343':'#3c4a43');
+  }
+  return {staticData:b.staticData,waterData:b.waterData,repairData:b.repairData,gateData:expansion.gateData,doorData:expansion.doorData,lampData:buildLampZones(),floodData:expansion.floodData,ctlData:expansion.ctlData,creatureData:buildCreature(),exitPoint:[0,1.95,8.2],valvePoint:[3.06,1.43,-6.08],pipePoint:[3.08,1.43,-3.34],pumpPanelPoint:[20.8,1.65,-23.7],blockedAccessPoint:[-26.55,1.55,-29.0],eastAccessPoint:[27.15,1.55,-28.2],junctionPoint:[0,1.5,-29.0],lockerPoint:[31.3,1.3,-25.5],notePoint:[30.7,.5,-31.2],panelServisPoint:[33.87,1.5,-26.1],terminalPoint:[37.6,1.2,-25.34],radioPoint:[40.28,.9,-27.0],hatchPoint:[38.0,.5,-29.3],toolboxPoint:[18.0,.45,-23.0],valveIndukPoint:[6.25,-3.2,-28.25],ladderUpPoint:[11.5,-2.9,-24.55],radioBawahPoint:[9.0,-3.78,-24.95]};
+}
+
+function buildExpandedSewerMap(b){
+  const gateBuilder=new SceneBuilder(),doorB=new SceneBuilder(),ctlB=new SceneBuilder(),floodB=[new SceneBuilder(),new SceneBuilder(),new SceneBuilder()];
+  const concrete='#2b3632',edge='#485850',metal='#53645b',rust='#79533a',yellow='#b38b4e',dark='#0b1311';
+
+  // -------------------------------------------------------------------
+  // 1) TRANSFER THROAT. The original maintenance corridor narrows before
+  // opening into the service vault. Its dimensions match the collision map.
+  // -------------------------------------------------------------------
+  b.box([0,-.22,-19.45],[6.45,.44,6.35],'#202b28');
+  b.box([0,4.12,-19.45],[6.45,.36,6.35],'#101817');
+  for(const x of [-3.01,3.01])b.box([x,1.95,-19.45],[.42,4.05,6.35],concrete);
+  for(const z of [-18.1,-20.75]){
+    for(const x of [-2.77,2.77])b.box([x,2.0,z],[.11,3.8,.18],edge);
+    b.box([0,3.86,z],[5.75,.14,.18],edge);
+    b.box([0,.08,z],[5.8,.13,.18],'#3b4841');
+  }
+  // One conspicuous cable tray runs overhead; the narrowing has a purpose,
+  // not a random extra room pasted onto the end of the old corridor.
+  b.box([0,3.65,-19.45],[.48,.12,5.85],'#3e4d45');
+  b.cylinder([-.82,3.43,-19.45],[.13,6.0,.13],'#66756b',[Math.PI/2,0,0]);
+  b.cylinder([.82,3.43,-19.45],[.09,6.0,.09],'#4f6258',[Math.PI/2,0,0]);
+  b.box([0,.035,-22.36],[4.95,.055,.35],'#8c7958');
+
+  // -------------------------------------------------------------------
+  // 2) CENTRAL JUNCTION / INTERCEPTOR GALLERY (15.2 x 13 m outside).
+  // The room is a single coherent vault. Doors align exactly with branches.
+  // -------------------------------------------------------------------
+  // Split the floor around the central interceptor trough; the grate is flush with the walking plane.
+  b.box([-4.18,-.22,-29.0],[6.84,.44,13.0],'#222d29');
+  b.box([4.18,-.22,-29.0],[6.84,.44,13.0],'#222d29');
+  b.box([0,-.295,-29.0],[1.52,.09,11.15],'#0b1512');
+  b.box([0,-.225,-29.0],[1.30,.018,10.9],'#203a32', [0,0,0], .025, true);
+  b.box([0,4.12,-29.0],[15.2,.36,13.0],'#111918');
+  // North wall: an opening only as wide as the transfer throat.
+  for(const x of [-5.1375,5.1375])b.box([x,1.95,-22.5],[4.925,4.05,.42],concrete);
+  b.box([0,3.58,-22.5],[5.35,.88,.42],concrete);
+  // Side walls: matching 4.6 m branch openings centred on the two connector halls.
+  for(const x of [-7.6,7.6]){
+    b.box([x,1.95,-24.6],[.42,4.05,4.2],concrete);
+    b.box([x,1.95,-33.4],[.42,4.05,4.2],concrete);
+    b.box([x,3.58,-29.0],[.42,.88,4.6],concrete);
+  }
+  // South wall is solid around a barred interceptor outlet: visible destination,
+  // but not a walk-through portal in this episode.
+  b.box([-5.1,1.95,-35.5],[5.0,4.05,.42],concrete);
+  b.box([5.1,1.95,-35.5],[5.0,4.05,.42],concrete);
+  b.box([0,3.45,-35.5],[2.6,1.05,.42],concrete);
+  b.box([0,.02,-35.5],[2.6,.04,.42],'#313d37');
+  b.box([0,1.65,-35.25],[2.36,2.35,.12],dark);
+  b.torus([0,1.65,-35.16],[2.6,2.48,.16],'#63756a',[0,0,0]);
+  for(let x=-.90;x<=.91;x+=.45)b.box([x,1.65,-35.16],[.055,2.05,.06],'#7a8980');
+  // Structural ribs are offset from all doorways so the room reads clearly.
+  for(const z of [-25.25,-33.0]){
+    for(const x of [-6.65,6.65])b.box([x,2.0,z],[.19,3.84,.28],edge);
+    b.box([0,3.86,z],[12.8,.16,.28],edge);
+  }
+  for(const x of [-5.7,5.7]){
+    b.box([x,3.22,-29.0],[.24,1.25,11.5],'#405149');
+    b.box([x,2.49,-29.0],[.08,.22,11.5],'#57675c');
+  }
+  // A central recessed interceptor gutter plus cross-grates explains why this
+  // is a hydraulic junction rather than an arbitrary square room.
+  b.box([-.80,-.17,-29.0],[.12,.34,11.15],'#3b5148');
+  b.box([.80,-.17,-29.0],[.12,.34,11.15],'#3b5148');
+  // Flush galvanized bars: no raised 14 cm trip-lip above the concrete floor.
+  for(let z=-34.35;z<=-23.95;z+=.52)b.box([0,-.012,z],[1.52,.025,.075],'#7a887d');
+  for(const x of [-.60,-.30,0,.30,.60])b.box([x,-.012,-29.15],[.035,.025,10.35],'#303f38');
+  // Service signs are geometric colour bands: legible in the low-poly renderer
+  // without a network font or a texture atlas.
+  b.box([-7.36,2.7,-26.15],[.06,.66,1.0],yellow);
+  b.box([7.36,2.7,-26.15],[.06,.66,1.0],'#78978b');
+  for(const z of [-24.95,-29.0,-33.1]){
+    const glow=z===-29.0?.17:.075;
+    b.box([0,3.78,z],[1.22,.055,.29],z===-29.0?'#bf9660':'#718579',[0,0,0],glow);
+    b.box([-.55,3.79,z],[.045,.30,.045],edge);b.box([.55,3.79,z],[.045,.30,.045],edge);
+  }
+  // Main feed pipes continue overhead from the old corridor into this vault.
+  b.cylinder([-5.35,3.42,-29.0],[.23,11.8,.23],'#526359',[Math.PI/2,0,0]);
+  b.cylinder([5.35,3.35,-29.0],[.18,11.8,.18],'#43584e',[Math.PI/2,0,0]);
+  // Bracket each feed pipe from the roof at four serviceable points. Arms meet the underside;
+  // paired hangers stay outside each pipe's diameter instead of stabbing through the pipe.
+  for(const [pipeX,pipeY] of [[-5.35,3.42],[5.35,3.35]]){
+    const armY=pipeY-(pipeX<0?.115:.09)-.035;
+    for(const z of [-24.5,-28.0,-31.5,-34.0]){
+      b.box([pipeX,armY,z],[.66,.07,.08],'#53645a');
+      for(const dx of [-.30,.30])b.cylinder([pipeX+dx,3.61,z],[.045,.65,.045],'#66766a');
+    }
+  }
+  for(const z of [-24.2,-27.0,-31.0,-33.8]){
+    for(const x of [-7.28,7.28]){
+      b.box([x,2.15,z],[.08,.66,.58],'#172220');
+      b.box([x+(x<0?.05:-.05),2.18,z],[.035,.14,.3],x<0?yellow:'#83a091');
+    }
+  }
+  // Damp panels follow the walking margins instead of appearing as random noise.
+  for(const [x,z,w,d] of [[-2.35,-25.8,1.0,.34],[2.5,-27.1,.8,.42],[-2.6,-31.9,1.2,.38],[2.4,-33.0,1.05,.32]]){
+    b.box([x,.025,z],[w,.018,d],'#2d403b');
+    b.box([x+.1,.039,z-.035],[w*.34,.008,d*.3],'#42554b');
+  }
+
+  // -------------------------------------------------------------------
+  // 3) WEST BRANCH: screen gallery. Longer, wetter, amber corrosion cues.
+  // A west-side channel and transverse screens leave a continuous, wide walkway along the east wall.
+  // -------------------------------------------------------------------
+  b.box([-10.4,-.22,-29.0],[6.4,.44,4.8],'#202b27');
+  b.box([-10.4,4.12,-29.0],[6.4,.36,4.8],'#111918');
+  for(const z of [-26.7,-31.3])b.box([-10.4,1.95,z],[6.4,4.05,.42],concrete);
+  for(const z of [-26.7,-31.3]){
+    b.box([-10.4,3.86,z],[6.0,.14,.18],edge);
+    b.box([-10.4,.075,z],[6.0,.12,.18],'#46544a');
+  }
+  // Screen chamber: 8.2 m wide x 15 m long; its depth distinguishes it from the pump bay.
+  // Split the floor around the west-side trench rather than painting a dark
+  // rectangle over a solid slab. The cutout and the collision footprint agree.
+  b.box([-17.3,-.22,-26.55],[8.2,.44,7.1],'#292c24');
+  b.box([-21.25,-.22,-37.75],[.3,.44,.5],'#292c24');
+  b.box([-15.9,-.22,-37.75],[5.4,.44,.5],'#292c24');
+  b.box([-21.25,-.22,-33.8],[.3,.44,7.4],'#292c24');
+  b.box([-15.9,-.22,-33.8],[5.4,.44,7.4],'#292c24');
+  b.box([-17.3,4.12,-30.5],[8.2,.36,15.0],'#171816');
+  b.box([-17.3,1.95,-23.0],[8.2,4.05,.42],'#37352b');
+  // The longitudinal screened channel terminates at a small outlet through
+  // the southern wall. The opening reaches below the floor level of the pit.
+  b.box([-21.25,1.95,-38.0],[.3,4.05,.42],'#252a24');
+  b.box([-15.9,1.95,-38.0],[5.4,4.05,.42],'#252a24');
+  b.box([-19.85,3.05,-38.0],[2.5,1.90,.42],'#252a24');
+  // Inner wall at the connector has a clear doorway and lintel.
+  b.box([-13.2,1.95,-24.9],[.42,4.05,3.8],'#38372d');
+  b.box([-13.2,1.95,-34.65],[.42,4.05,6.7],'#303127');
+  b.box([-13.2,3.58,-29.0],[.42,.88,4.8],'#454638');
+  // Far wall includes an independently powered gate into the emergency access tube.
+  b.box([-21.4,1.95,-24.9],[.42,4.05,3.8],'#38372d');
+  b.box([-21.4,1.95,-34.65],[.42,4.05,6.7],'#303127');
+  b.box([-21.4,3.58,-29.0],[.42,.88,4.8],'#454638');
+  b.box([-21.18,1.96,-31.36],[.55,4.0,.34],'#4f5c4d');
+  b.box([-21.18,1.96,-26.64],[.55,4.0,.34],'#4f5c4d');
+  b.box([-21.18,3.78,-29.0],[.55,.32,5.0],'#59634f');
+  b.box([-21.18,.02,-29.0],[.55,.04,5.0],'#4a5549');
+  gateBuilder.box([-21.4,1.55,-29.0],[.20,2.9,4.55],'#151c18');
+  for(let z=-31.05;z<=-26.95;z+=.58)gateBuilder.box([-21.28,1.55,z],[.05,2.55,.11],z< -29.0?'#9d7c4d':'#7d8d77',[0,0,.09]);
+  // Longitudinal side-channel: keep it against the west wall so the room has
+  // a continuous, visibly clear maintenance walkway along its east side.
+  // The channel runs north-south; three transverse bar screens sit across it.
+  const screenChannelX=-19.85, screenChannelZ=-33.95;
+  // Channel bottom is visibly lower than the maintenance floor, with concrete
+  // cheeks and water at the bottom. The camera cannot step into this cutout.
+  b.box([screenChannelX,-.31,screenChannelZ],[2.40,.12,7.70],'#101815');
+  b.box([screenChannelX,-.225,screenChannelZ],[2.08,.018,7.58],'#29423b',[0,0,0],.035,true);
+  for(const x of [-21.10,-18.60]){
+    b.box([x,-.105,screenChannelZ],[.12,.39,7.70],'#46564b');
+    b.box([x,.55,screenChannelZ],[.08,.10,7.35],'#8a795a');
+    for(const z of [-37.0,-35.0,-33.0,-31.0])b.box([x,.31,z],[.07,.58,.07],'#6d765f');
+  }
+  // Three removable bar-screen panels span the trench, at separate intervals.
+  // A continuous dry walkway remains on their east side for inspection.
+  for(const z of [-31.65,-33.85,-36.05]){
+    b.box([screenChannelX,2.12,z],[2.62,.12,.12],'#7c775e');
+    b.box([screenChannelX,-.20,z],[2.62,.10,.12],'#596451');
+    for(const x of [-20.98,-20.73,-20.48,-20.23,-19.98,-19.73,-19.48,-19.23,-18.98,-18.73]){
+      b.box([x,.95,z],[.045,2.30,.055],z< -34?'#8d7a57':'#697568');
+    }
+    for(const x of [-21.08,-18.62])b.box([x,.95,z],[.10,2.40,.12],'#38483d');
+  }
+  // Low-flow streaks sit below the walking plane to reinforce the trench depth.
+  for(let i=0;i<12;i++){
+    const z=-30.55-i*.60;
+    b.box([screenChannelX-.22,-.205,z],[.055,.012,.32],i%2?'#385a50':'#42655a',[0,0,.03],.045,true);
+  }
+  // Framed screened outlet at the end of the channel; black depth behind bars
+  // prevents the opening from looking like a decal on a solid wall.
+  b.box([screenChannelX,.90,-37.72],[2.36,2.28,.045],'#0b1411');
+  b.torus([screenChannelX,.90,-37.68],[2.22,2.18,.14],'#62766a',[0,0,0]);
+  for(const x of [-20.75,-20.30,-19.85,-19.40,-18.95])b.box([x,.90,-37.65],[.055,2.25,.06],'#829185');
+  // Two old overflow lines are grouped against the east wall, with wall arms
+  // at distinct elevations so supports do not pass through either pipe.
+  b.cylinder([-14.05,3.23,-27.2],[.34,7.1,.34],'#665f4b',[Math.PI/2,0,0]);
+  b.cylinder([-14.70,3.75,-26.95],[.18,6.6,.18],'#74654b',[Math.PI/2,0,0]);
+  for(const z of [-24.8,-27.2,-29.6]){
+    b.box([-13.70,3.05,z],[.62,.10,.12],'#5a6253');
+    b.box([-14.02,3.63,z],[1.28,.10,.10],'#65705d');
+  }
+  for(const z of [-25.2,-26.2,-35.7]){
+    b.box([-21.17,1.1,z],[.035,.64,.26],'#573f2e');
+    b.box([-13.45,1.55,z],[.035,.48,.3],'#6b563c');
+  }
+  // A yellow stripe and amber fixture lead the eye toward the gate, but don't reveal why it matters.
+  b.box([-20.85,.035,-29.0],[.5,.018,.14],yellow);
+  b.box([-17.3,3.78,-25.5],[.9,.055,.26],'#b39663',[0,0,0],.12);
+  b.box([-17.3,3.78,-36.1],[.9,.055,.26],'#89734e',[0,0,0],.06);
+
+  // West emergency tunnel, aligned with the gated opening and the target position.
+  b.box([-24.5,-.22,-29.0],[6.2,.44,4.8],'#252b25');
+  b.box([-24.5,4.12,-29.0],[6.2,.36,4.8],'#141916');
+  b.box([-24.5,1.95,-26.7],[6.2,4.05,.42],'#34382d');
+  b.box([-24.5,1.95,-31.3],[6.2,4.05,.42],'#34382d');
+  b.box([-27.6,1.95,-29.0],[.42,4.05,4.8],'#343a30');
+  b.box([-27.34,1.7,-29.0],[.08,2.65,3.7],'#0e1512');
+  b.box([-27.28,1.7,-29.0],[.04,2.42,3.4],'#485247');
+  b.box([-27.22,2.91,-29.0],[.05,.08,3.5],yellow);
+  for(let y=.48;y<=2.75;y+=.34)b.cylinder([-27.23,y,-29.0],[.06,.95,.06],'#6c796d',[Math.PI/2,0,0]);
+  for(let i=0;i<7;i++)b.box([-26.82,.64+i*.36,-31.19],[.05,.16,.22],i%2?'#a5814b':'#3d4942');
+  b.box([-24.5,.035,-29.0],[5.5,.025,.12],yellow);
+
+  // -------------------------------------------------------------------
+  // 4) EAST BRANCH: drier machinery bay. Entry, pumps, panel, then a narrow
+  // service passage. The route is deliberately staggered, not a mirror wing.
+  // -------------------------------------------------------------------
+  b.box([10.4,-.22,-29.0],[6.4,.44,4.8],'#202b28');
+  b.box([10.4,4.12,-29.0],[6.4,.36,4.8],'#111918');
+  b.box([10.4,1.95,-31.3],[6.4,4.05,.42],concrete);b.box([8.4,1.95,-26.7],[2.4,4.05,.42],concrete);b.box([12.5,1.95,-26.7],[2.2,4.05,.42],concrete);b.box([10.5,3.5375,-26.7],[1.8,.875,.42],concrete);
+  for(const z of [-26.7,-31.3]){
+    b.box([10.4,3.86,z],[6.0,.14,.18],edge);
+    b.box([10.4,.075,z],[6.0,.12,.18],'#46544a');
+  }
+  // Pump room is shifted slightly north and uses a different footprint to break the mirrored cross.
+  // Floor slabs stop around the guarded sump so it is a real shallow well,
+  // not a dark decal painted on top of an unbroken floor.
+  b.box([17.8,-.22,-30.2],[8.8,.44,8.8],'#222e29');
+  b.box([17.8,-.22,-23.7],[8.8,.44,2.2],'#222e29');
+  b.box([13.9625,-.22,-25.3],[1.125,.44,1.0],'#222e29');
+  b.box([19.4375,-.22,-25.3],[5.525,.44,1.0],'#222e29');
+  b.box([17.8,4.12,-28.6],[8.8,.36,12.0],'#101918');
+  b.box([17.8,1.95,-22.6],[8.8,4.05,.42],'#2e3933');
+  b.box([17.8,1.95,-34.6],[8.8,4.05,.42],'#25302a');
+  // West wall opening faces the connector; east wall opening faces the exit service hall.
+  b.box([13.4,1.95,-24.65],[.42,4.05,4.1],'#2e3933');
+  b.box([13.4,1.95,-32.95],[.42,4.05,3.3],'#25302a');
+  b.box([13.4,3.58,-29.0],[.42,.88,4.6],'#3d4b42');
+  b.box([22.2,1.95,-24.55],[.42,4.05,3.9],'#2e3933');
+  b.box([22.2,1.95,-32.3],[.42,4.05,4.6],'#25302a');
+  b.box([22.2,3.58,-28.25],[.42,.88,3.5],'#3d4b42');
+  // Pump plinths, motor housings, guarded couplings and rising discharge lines.
+  for(const [x,z] of [[15.5,-31.3],[18.4,-31.3]]){
+    b.box([x,.22,z],[2.0,.42,1.6],'#39473f');
+    // Horizontal motor/pump body on a service skid.
+    b.cylinder([x,.98,z],[1.0,2.05,1.0],'#4a5d52',[0,0,Math.PI/2]);
+    b.cylinder([x,.98,z],[1.16,.14,1.16],'#697a6d',[0,0,Math.PI/2]);
+    b.cylinder([x,1.00,z],[.48,.18,.48],'#26362e',[0,0,Math.PI/2]);
+    // Four short mounting feet meet the skid without intersecting the motor housing.
+    for(const dx of [-.78,.78])for(const dz of [-.52,.52])b.box([x+dx,.455,z+dz],[.12,.05,.12],'#78877a');
+    // Discharge risers sit just outside the motor casings, not through the housing.
+    const riserX=x+1.15;
+    b.cylinder([riserX,2.55,z],[.16,2.50,.16],'#576a5d');
+    b.cylinder([riserX,3.78,z],[.23,.14,.23],'#718477');
+    // Short side outlet bridges the casing to its riser.
+    b.cylinder([x+1.045,1.28,z],[.15,.18,.15],'#718477',[0,0,Math.PI/2]);
+  }
+  // The two outlet risers meet at one cross-header; pump 2 continues into the north-wall main.
+  b.cylinder([18.10,3.72,-31.3],[.18,2.90,.18],'#596b5e',[0,0,Math.PI/2]);
+  b.cylinder([19.55,3.72,-27.05],[.16,8.50,.16],'#51665b',[Math.PI/2,0,0]);
+  // Low suction lines run under the guardrail, then enter the sump/intake manifold.
+  for(const x of [15.5,18.4]){
+    b.cylinder([x,.23,-28.25],[.20,5.90,.20],'#53665b',[Math.PI/2,0,0]);
+    // Discrete low saddles support the intake line instead of a continuous curb.
+    for(const zSupport of [-26.3,-27.3,-28.3,-29.3,-30.3])b.box([x,.065,zSupport],[.32,.13,.12],'#38473f');
+  }
+  b.cylinder([15.5,-.15,-25.30],[.16,.60,.16],'#4f6558');
+  // Buried suction manifold links the sump intake to pump 2 without cutting through guardrails.
+  b.cylinder([16.95,-.40,-25.30],[.20,2.90,.20],'#53665b',[0,0,Math.PI/2]);
+  b.cylinder([18.4,-.02,-25.30],[.20,.65,.20],'#4f6558');
+  // Control cabinet is mounted on the solid north wall, away from the east service doorway.
+  // Its bracket, face plate, indicators and conduit all occupy the same wall plane.
+  b.box([20.8,1.68,-22.88],[1.32,1.1,.16],'#34473c');
+  b.box([20.8,1.72,-22.96],[.90,.78,.06],'#14221b');
+  b.box([20.52,2.06,-23.00],[.13,.13,.035],'#bb5945',[0,0,0],.2);
+  b.box([20.80,1.82,-23.00],[.13,.13,.035],'#c8a05f',[0,0,0],.13);
+  b.box([21.08,1.58,-23.00],[.13,.13,.035],'#739786',[0,0,0],.11);
+  b.box([20.25,1.32,-22.75],[.12,.12,.16],'#53665b');
+  b.box([21.35,1.32,-22.75],[.12,.12,.16],'#53665b');
+  b.box([20.8,.62,-22.90],[.07,1.18,.08],'#53665b');
+  b.box([20.8,.06,-23.0],[2.30,.025,.12],'#3b4a40');
+  // Recessed sump: a dark bottom and four concrete cheeks sit below floor level.
+  b.box([15.6,-.50,-25.3],[2.15,.10,1.0],'#111a17');
+  b.box([15.6,-.425,-25.3],[1.65,.02,.58],'#233c34',[0,0,0],.03,true);
+  for(const x of [14.475,16.725])b.box([x,-.22,-25.3],[.10,.46,1.0],'#48584d');
+  for(const z of [-25.8,-24.8])b.box([15.6,-.22,z],[2.25,.46,.10],'#48584d');
+  // Guardrail follows the new pit footprint and leaves a clear approach from the west doorway.
+  for(const x of [14.5,16.7]){
+    b.box([x,.56,-25.3],[.07,.10,1.3],'#829184');
+    for(const z of [-25.85,-25.3,-24.75])b.box([x,.33,z],[.07,.56,.07],'#64756a');
+  }
+  for(const z of [-25.95,-24.65]){
+    b.box([15.6,.56,z],[2.2,.10,.07],'#829184');
+    for(const x of [14.5,15.9,16.7])b.box([x,.33,z],[.07,.56,.07],'#64756a');
+  }
+  // Cold fixtures and a few labelled-looking service bands distinguish the pump bay from the screen house.
+  for(const z of [-24.2,-29.1,-33.1]){
+    b.box([17.8,3.78,z],[1.15,.055,.27],z===-29.1?'#9bb8a1':'#708d80',[0,0,0],z===-29.1?.15:.07);
+  }
+  b.box([13.64,2.55,-25.6],[.06,.6,.85],'#80988a');
+  b.box([21.95,.035,-28.25],[.12,.018,2.0],yellow);
+
+  // Narrow service passage beyond the pumps; no artificial gap between collider and shell.
+  b.box([25.3,-.22,-28.25],[6.2,.44,3.5],'#1e2b26');
+  b.box([25.3,4.12,-28.25],[6.2,.36,3.5],'#101817');
+  b.box([25.3,1.95,-26.5],[6.2,4.05,.42],'#293630');
+  b.box([25.3,1.95,-30.0],[6.2,4.05,.42],'#293630');
+  // Final service door is physically distinct from the emergency hatch on the west branch.
+
+  // ---- BAB 3: ruang ganti + ruang kontrol (semua prop diverifikasi menempel lantai/dinding/induknya) ----
+  b.box([34.82,-0.22,-28.25],[12.84,0.44,7.34],'#1e2b26');
+  b.box([34.82,4.12,-28.25],[12.84,0.36,7.34],'#101817');
+  b.box([34.715,1.95,-31.71],[13.05,4.05,0.42],'#2c3831');
+  b.box([34.715,1.95,-24.79],[13.05,4.05,0.42],'#293630');
+  b.box([41.03,1.95,-28.25],[0.42,4.05,7.34],'#2c3831');
+  b.box([34.2,1.95,-30.585],[0.42,4.05,2.67],'#2c3831');
+  b.box([34.2,1.95,-25.915],[0.42,4.05,2.67],'#2c3831');
+  b.box([34.2,3.5375,-28.25],[0.42,0.875,2],'#2c3831');
+  b.box([28.4,1.95,-30.96],[0.42,4.05,1.92],'#2c3831');
+  b.box([28.4,1.95,-25.54],[0.42,4.05,1.92],'#2c3831');
+  b.box([28.4,1.95,-29.725],[0.42,4.05,0.55],'#2c3831');
+  b.box([28.4,1.95,-26.775],[0.42,4.05,0.55],'#2c3831');
+  b.box([28.4,3.5375,-28.25],[0.42,0.875,2.4],'#2c3831');
+  b.box([29.9,0.95,-25.25],[0.62,1.9,0.5],'#3d4a44');
+  b.box([30.08,1,-25.52],[0.05,0.22,0.04],'#7d8a80');
+  b.box([30.6,0.95,-25.25],[0.62,1.9,0.5],'#3d4a44');
+  b.box([30.78,1,-25.52],[0.05,0.22,0.04],'#7d8a80');
+  b.box([31.3,0.95,-25.25],[0.62,1.9,0.5],'#3d4a44');
+  b.box([31.48,1,-25.52],[0.05,0.22,0.04],'#7d8a80');
+  b.box([32,0.95,-25.25],[0.62,1.9,0.5],'#3d4a44');
+  b.box([32.18,1,-25.52],[0.05,0.22,0.04],'#7d8a80');
+  b.box([32.7,0.95,-25.25],[0.62,1.9,0.5],'#3d4a44');
+  b.box([32.88,1,-25.52],[0.05,0.22,0.04],'#7d8a80');
+  b.box([31.22,1.55,-25.52],[0.16,0.1,0.03],'#b18b4e',[0,0,0],0.1);
+  b.box([31.2,0.45,-31.2],[2.4,0.08,0.5],'#4f4636');
+  b.box([30.2,0.205,-31.2],[0.08,0.41,0.4],'#3a3328');
+  b.box([32.2,0.205,-31.2],[0.08,0.41,0.4],'#3a3328');
+  b.box([30.7,0.5,-31.2],[0.3,0.02,0.22],'#cbbf9d',[0,0,0],0.08);
+  b.box([31.2,1.75,-31.48],[1.5,0.9,0.04],'#5a4d38');
+  b.box([30.7,1.75,-31.455],[0.3,0.4,0.01],'#b7b08f');
+  b.box([31.2,1.75,-31.455],[0.3,0.4,0.01],'#b18b4e');
+  b.box([31.8,1.75,-31.455],[0.3,0.4,0.01],'#a9b3a2');
+  b.box([31.3,3.78,-28.25],[1.2,0.055,0.29],'#9bb8a1',[0,0,0],0.1);
+  b.box([30.8,3.875,-28.25],[0.04,0.135,0.04],'#4a5750');
+  b.box([31.8,3.875,-28.25],[0.04,0.135,0.04],'#4a5750');
+  b.box([31.3,0.012,-28.25],[5,0.024,0.1],'#b38b4e');
+  b.box([33.93,1.45,-26.1],[0.12,1.1,0.9],'#34473c');
+  b.box([33.865,1.5,-26.1],[0.03,0.8,0.7],'#14221b');
+  b.box([33.845,1.35,-26.1],[0.02,0.12,0.3],'#050807');
+  b.lamp(5,[33.845,1.8,-26.3],[.02,.1,.1],'#bb5945',.25);
+  b.lamp(6,[33.845,1.8,-25.9],[.02,.1,.1],'#6fae7c',.25);
+  b.box([37.6,0.75,-25.45],[2.2,0.06,0.8],'#4d4636');
+  b.box([36.6,0.36,-25.45],[0.06,0.72,0.7],'#3a3a32');
+  b.box([38.6,0.36,-25.45],[0.06,0.72,0.7],'#3a3a32');
+  b.box([37.6,0.795,-25.7],[0.5,0.03,0.16],'#26302c');
+  b.box([37.6,0.88,-25.3],[0.08,0.2,0.08],'#26302c');
+  b.box([37.6,1.22,-25.3],[0.72,0.46,0.06],'#10171a');
+  b.box([37.6,1.22,-25.345],[0.62,0.36,0.02],'#5f8f78',[0,0,0],0.35);
+  b.box([40.4,0.75,-27],[0.7,0.06,1.6],'#4a4436');
+  b.box([40.4,0.36,-27.7],[0.5,0.72,0.08],'#3a3328');
+  b.box([40.4,0.36,-26.3],[0.5,0.72,0.08],'#3a3328');
+  b.box([40.45,0.9,-27],[0.34,0.24,0.5],'#2c3a33');
+  b.box([40.275,0.9,-27],[0.02,0.18,0.36],'#171f1b');
+  b.box([40.55,1.27,-26.85],[0.02,0.5,0.02],'#6c796d');
+  b.box([38,0.02,-29.3],[1.3,0.04,1.3],'#46544a');
+  b.box([38,0.055,-29.3],[1.1,0.03,1.1],'#2d3a33');
+  b.box([38,0.08,-29.3],[0.4,0.03,0.06],'#8a7a55');
+  b.box([37.6,3.78,-28.25],[1.2,0.055,0.29],'#9bb8a1',[0,0,0],0.12);
+  b.box([37.1,3.875,-28.25],[0.04,0.135,0.04],'#4a5750');
+  b.box([38.1,3.875,-28.25],[0.04,0.135,0.04],'#4a5750');
+
+  // ---- BAB 4: level bawah (lantai Y=-4.5), semua prop divalidasi menempel lantai/dinding/induk ----
+  b.box([23.5,-4.72,-28.25],[35.8,0.44,8.3],'#1d2824');
+  b.box([8.325,-0.72,-28.25],[5.45,.36,8.3],'#101817');b.box([26.675,-0.72,-28.25],[29.45,.36,8.3],'#101817');b.box([11.5,-0.72,-24.325],[.9,.36,.45],'#101817');b.box([11.5,-0.72,-28.925],[.9,.36,6.95],'#101817');
+  b.box([10,-2.5575,-32.2],[8.8,4.035,0.4],'#2a3531');
+  b.box([10,-2.5575,-24.3],[8.8,4.035,0.4],'#2a3531');
+  b.box([5.8,-2.5575,-28.25],[0.4,4.035,8.3],'#2a3531');
+  b.box([37.2,-2.5575,-32.2],[8.4,4.035,0.4],'#2a3531');
+  b.box([37.2,-2.5575,-24.3],[8.4,4.035,0.4],'#2a3531');
+  b.box([41.2,-2.5575,-28.25],[0.4,4.035,8.3],'#2a3531');
+  b.box([14.4,-2.5575,-31.1],[0.4,4.035,2.6],'#2a3531');
+  b.box([14.4,-2.5575,-25.4],[0.4,4.035,2.6],'#2a3531');
+  b.box([33,-2.5575,-31.1],[0.4,4.035,2.6],'#2a3531');
+  b.box([33,-2.5575,-25.4],[0.4,4.035,2.6],'#2a3531');
+  b.box([23.7,-2.5575,-30],[18.6,4.035,0.4],'#2a3531');
+  b.box([23.7,-2.5575,-26.5],[18.6,4.035,0.4],'#2a3531');
+  b.box([38,-2.7,-29.3],[0.7,3.6,0.7],'#34403a');
+  b.box([37.625,-2.65,-29.55],[0.05,3.5,0.05],'#6c796d');
+  b.box([37.625,-2.65,-29.05],[0.05,3.5,0.05],'#6c796d');
+  b.box([37.63,-4.2,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-3.85,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-3.5,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-3.15,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-2.8,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-2.45,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-2.1,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-1.75,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([37.63,-1.4,-29.3],[0.04,0.04,0.5],'#6c796d');
+  b.box([36.3,-4.488,-28.25],[3,0.024,0.1],'#b38b4e');
+  b.box([36.2,-1.12,-28.25],[1,0.055,0.29],'#9bb8a1',[0,0,0],0.1);
+  b.box([35.8,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([36.6,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([20.5,-1.12,-28.25],[1,0.055,0.29],'#9bb8a1',[0,0,0],0.1);
+  b.box([20.1,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([20.9,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([27,-1.12,-28.25],[1,0.055,0.29],'#9bb8a1',[0,0,0],0.1);
+  b.box([26.6,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([27.4,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([10,-1.12,-28.25],[1,0.055,0.29],'#9bb8a1',[0,0,0],0.1);
+  b.box([9.6,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([10.4,-0.995,-28.25],[0.04,0.19,0.04],'#4a5750');
+  b.box([23.7,-1.15,-27.2],[18.2,0.5,0.5],'#53665b');
+  b.box([6.05,-3.2,-28.25],[0.1,0.9,0.9],'#5a3a30');
+  b.box([6.17,-3.2,-28.25],[0.14,0.16,0.16],'#9a3f32');
+  b.box([6.22,-3.2,-28.25],[0.06,0.8,0.08],'#9a3f32');
+  b.box([6.22,-3.2,-28.25],[0.06,0.08,0.8],'#9a3f32');
+  b.box([6.22,-2.8,-28.25],[0.06,0.06,0.86],'#9a3f32');
+  b.box([6.22,-3.6,-28.25],[0.06,0.06,0.86],'#9a3f32');
+  b.box([6.22,-3.2,-27.85],[0.06,0.86,0.06],'#9a3f32');
+  b.box([6.22,-3.2,-28.65],[0.06,0.86,0.06],'#9a3f32');
+  b.box([9,-4.2,-24.95],[0.8,0.6,0.8],'#4a4436');
+  b.box([9,-3.78,-24.95],[0.3,0.24,0.3],'#2c3a33');
+  b.box([9.1,-3.54,-24.95],[0.02,0.4,0.02],'#6c796d');
+  b.box([11.25,-1.7,-24.525],[.05,5.4,.05],'#6c796d');b.box([11.75,-1.7,-24.525],[.05,5.4,.05],'#6c796d');
+  b.box([11.5,-4.20,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-3.85,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-3.50,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-3.15,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-2.80,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-2.45,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-2.10,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-1.75,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-1.40,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-1.05,-24.52],[.5,.04,.04],'#6c796d');b.box([11.5,-0.70,-24.52],[.5,.04,.04],'#6c796d');
+  [.3,.2,.1].forEach((h,i)=>floodB[i].box([23.7,-4.5+h/2,-28.25],[18.2,h,3.1],'#1b3a36',[0,0,0],.03));
+  b.box([18.0,.2,-23.0],[.6,.4,.4],'#6a4a36');b.box([18.0,.42,-23.0],[.62,.04,.42],'#4d3526');b.box([18.0,.46,-23.0],[.2,.04,.04],'#8a8a7a');
+  // ---- Ruang akses darurat (di atas tangga Bab 4), lantai berlubang selaras dengan poros ----
+  b.box([8.4,1.95,-24.495],[0.4,4.05,3.99],'#2b3632');
+  b.box([12.8,1.95,-24.495],[0.4,4.05,3.99],'#2b3632');
+  b.box([10.6,1.95,-22.7],[4.8,4.05,0.4],'#2b3632');
+  b.box([10.6,4.12,-24.5],[4.8,0.36,4],'#111918');
+  b.box([9.725,-0.27,-24.5],[2.65,0.54,4],'#202b28');
+  b.box([12.375,-0.27,-24.5],[0.85,0.54,4],'#202b28');
+  b.box([11.5,-0.27,-25.975],[0.9,0.54,1.05],'#202b28');
+  b.box([11.5,-0.27,-23.525],[0.9,0.54,2.05],'#202b28');
+  b.box([9.6,0.03,-24],[0.9,0.06,0.9],'#46544a');
+  b.box([11.5,0.012,-25.95],[0.8,0.024,0.08],'#b38b4e');
+  b.box([10.95,0.012,-25],[0.08,0.024,0.9],'#b38b4e');
+  b.box([11,2.2,-22.92],[0.9,0.5,0.04],'#b38b4e');
+  b.box([10.6,3.78,-24.5],[1,0.055,0.29],'#9bb8a1',[0,0,0],0.1);
+  b.box([10.2,3.875,-24.5],[0.04,0.135,0.04],'#4a5750');
+  b.box([11,3.875,-24.5],[0.04,0.135,0.04],'#4a5750');
+  doorB.box([28.14,1.72,-28.25],[.08,2.75,2.4],'#0d1512');doorB.box([28.08,1.72,-28.25],[.045,2.48,2.22],'#44574b');doorB.box([28.02,2.88,-28.25],[.045,.08,2.27],yellow);
+  for(let z=-29.1;z<=-27.4;z+=.34)doorB.cylinder([27.93,1.5,z],[.055,1.0,.055],'#738177',[Math.PI/2,0,0]);
+  ctlB.box([34.2,1.55,-28.25],[.1,3.1,2.0],'#3b4a42');ctlB.box([34.14,1.6,-28.25],[.02,.1,1.8],yellow,[0,0,0],.1);
+  for(const z of [-29.5,-27.0])b.box([25.3,.09,z],[5.7,.12,.08],'#6c7f72');
+  b.box([24.0,.035,-28.25],[2.2,.018,.12],'#7d956e');
+
+  // Small pipe supports, floor seams and leak stains are tied to each room's structure.
+  for(let z=-25.0;z>=-36.0;z-=2.2){
+    b.box([-20.9,.009,z],[.22,.018,.3],z< -31?'#4a4637':'#393f34');
+    b.box([21.0,.009,z],[.32,.018,.25],'#33443a');
+  }
+  for(const [lx,lz,hw] of [[-17.3,-25.5,.35],[-17.3,-36.1,.35],[17.8,-24.2,.45],[17.8,-29.1,.45],[17.8,-33.1,.45]])for(const dx of [-hw,hw])b.box([lx+dx,3.875,lz],[.04,.135,.04],'#4a5750');
+  return {floodData:floodB.map(x=>x.staticData),gateData:gateBuilder.staticData,doorData:doorB.staticData,ctlData:ctlB.staticData};
+}
+/* Makhluk dibangun di titik asal (kaki di y=0, depan = +z) lalu diposisikan lewat uniform shader.
+   Tubuh sengaja nyaris hitam: ia terbaca sebagai siluet di depan dinding yang tersorot senter,
+   sedangkan di area gelap hanya mata dan gigi pucatnya yang tampak melayang. */
+function buildCreature(){
+  const s=new SceneBuilder(),skin='#151d1a',deep='#0a0f0d',rib='#2b3b36',bone='#d3dacb',eye='#eef5e6';
+  // Kaki panjang dan kurus, lutut menekuk ke arah yang salah.
+  for(const sx of [-1,1]){
+    s.cylinder([sx*.16,.76,-.10],[.095,.80,.095],skin,[.30,0,sx*.03]);
+    s.cylinder([sx*.17,.27,.12],[.07,.68,.07],skin,[-.34,0,0]);
+    s.box([sx*.17,.03,.27],[.09,.05,.36],deep);
+  }
+  s.box([0,1.18,-.03],[.34,.22,.2],deep,[.12,0,0]);
+  // Badan sempit membungkuk ke depan; tulang rusuk menonjol tipis.
+  s.box([0,1.82,.02],[.36,1.18,.21],skin,[.16,0,.02]);
+  for(let i=0;i<6;i++)s.box([0,1.46+i*.15,.145],[.30-i*.01,.016,.03],rib,[0,0,(i%2?.04:-.03)]);
+  s.box([0,1.85,.155],[.025,.95,.025],rib);
+  s.box([.03,2.36,.07],[.74,.13,.19],skin,[.05,0,.07]);
+  // Leher terlalu panjang, kepala miring ke satu sisi.
+  s.cylinder([.02,2.66,.17],[.085,.52,.085],skin,[.34,0,.08]);
+  s.box([.07,2.98,.34],[.19,.36,.2],skin,[.32,0,.20]);
+  s.box([.10,2.74,.41],[.13,.30,.11],deep,[.30,0,.20]);
+  // Mata pucat tak sejajar, gigi kecil rapat di rahang yang menganga.
+  s.box([.03,3.06,.475],[.055,.022,.04],eye,[0,0,.20],1.6);
+  s.box([.13,3.02,.475],[.045,.026,.04],eye,[0,0,.20],1.1);
+  for(let i=0;i<7;i++)s.box([.03+i*.018,2.83,.49],[.011,.05+(i%3)*.013,.011],bone,[0,0,.2],.22);
+  // Lengan kanan menjuntai sampai ke bawah lutut, jari panjang.
+  s.cylinder([.45,1.82,.0],[.07,.96,.07],skin,[0,0,.05]);
+  s.cylinder([.49,.88,.04],[.055,1.22,.055],skin,[-.06,0,.03]);
+  for(let j=0;j<5;j++)s.box([.50+(j-2)*.028,.12,.07],[.014,.44,.014],skin,[0,0,(j-2)*.05]);
+  // Lengan kiri setengah terangkat, jari-jari mencakar ke arah depan.
+  s.cylinder([-.44,1.93,.15],[.07,.82,.07],skin,[-.37,0,-.05]);
+  s.cylinder([-.50,1.93,.50],[.055,.88,.055],skin,[.49,0,0]);
+  for(let j=0;j<5;j++)s.box([-.50+(j-2)*.03,2.52,.80],[.014,.42,.014],skin,[.25,0,(j-2)*.12]);
+  return s.staticData;
+}
+
+class Renderer {
+  constructor(canvasEl){
+    this.canvas=canvasEl;this.gl=canvasEl.getContext('webgl',{alpha:false,antialias:false,depth:true,stencil:false,powerPreference:'low-power',preserveDrawingBuffer:false})||canvasEl.getContext('experimental-webgl');
+    if(!this.gl) throw new Error('WebGL tidak tersedia');
+    const gl=this.gl;
+    const vs=`attribute vec3 aPosition;attribute vec3 aNormal;attribute vec3 aColor;attribute float aGlow;uniform mat4 uProjection;uniform mat4 uView;uniform vec3 uOffset;uniform vec2 uRot;uniform float uSway;uniform float uStretch;varying vec3 vWorld;varying vec3 vNormal;varying vec3 vColor;varying float vGlow;void main(){vec3 p=aPosition;float w=clamp((p.y-0.9)/1.9,0.0,1.0);p.y*=1.0+uStretch;p.x+=uSway*w*w;p=vec3(p.x*uRot.x+p.z*uRot.y,p.y,-p.x*uRot.y+p.z*uRot.x)+uOffset;vWorld=p;vNormal=normalize(vec3(aNormal.x*uRot.x+aNormal.z*uRot.y,aNormal.y,-aNormal.x*uRot.y+aNormal.z*uRot.x));vColor=aColor;vGlow=aGlow;gl_Position=uProjection*uView*vec4(p,1.0);}`;
+    const fs=`precision mediump float;uniform vec3 uCamera;uniform vec3 uLightDir;uniform float uTime;uniform float uFlicker;uniform vec3 uFogColor;uniform float uDread;varying vec3 vWorld;varying vec3 vNormal;varying vec3 vColor;varying float vGlow;void main(){vec3 N=normalize(vNormal);vec3 toFrag=normalize(vWorld-uCamera);float d=length(vWorld-uCamera);float cone= smoothstep(0.70,0.91,dot(toFrag,normalize(uLightDir)));float attenuation=1.0-smoothstep(3.0-uDread*0.7,13.0-uDread*2.8,d);float diffuse=max(dot(N,normalize(vec3(-0.24,0.91,-0.18))),0.0);float light=0.19-uDread*0.035+diffuse*0.18+cone*attenuation*(0.86*uFlicker)*(1.0+sin(uTime*0.9)*0.035*uDread);vec3 color=vColor*light+vColor*vGlow;float fog=smoothstep(9.0-uDread*2.5,25.0-uDread*6.0,d);color=mix(color,uFogColor,fog);float pulse=1.0+0.012*sin(uTime*1.37+vWorld.z*0.5);gl_FragColor=vec4(color*pulse,1.0);}`;
+    this.program=this._program(vs,fs);gl.useProgram(this.program);
+    this.loc={pos:gl.getAttribLocation(this.program,'aPosition'),norm:gl.getAttribLocation(this.program,'aNormal'),color:gl.getAttribLocation(this.program,'aColor'),glow:gl.getAttribLocation(this.program,'aGlow'),proj:gl.getUniformLocation(this.program,'uProjection'),view:gl.getUniformLocation(this.program,'uView'),camera:gl.getUniformLocation(this.program,'uCamera'),lightDir:gl.getUniformLocation(this.program,'uLightDir'),time:gl.getUniformLocation(this.program,'uTime'),flicker:gl.getUniformLocation(this.program,'uFlicker'),fog:gl.getUniformLocation(this.program,'uFogColor'),dread:gl.getUniformLocation(this.program,'uDread'),off:gl.getUniformLocation(this.program,'uOffset'),rot:gl.getUniformLocation(this.program,'uRot'),sway:gl.getUniformLocation(this.program,'uSway'),stretch:gl.getUniformLocation(this.program,'uStretch')};
+    gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);gl.clearColor(.012,.022,.023,1);
+    this.staticBatch=null;this.waterBatch=null;this.repairBatch=null;this.lampBatches=[];this.floodBatches=[];this.gateBatch=null;this.doorBatch=null;this.ctlBatch=null;this.creatureBatch=null;this.projection=Mat4.identity();this.lastFlicker=1;
+    this.resize();window.addEventListener('resize',()=>this.resize(),{passive:true});
+  }
+  _program(vsSource,fsSource){
+    const gl=this.gl;
+    const compile=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){const msg=gl.getShaderInfoLog(s);gl.deleteShader(s);throw new Error(msg||'Shader gagal dikompilasi');}return s;};
+    const p=gl.createProgram();gl.attachShader(p,compile(gl.VERTEX_SHADER,vsSource));gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fsSource));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p)||'Program WebGL gagal ditautkan');return p;
+  }
+  resize(){
+    const dpr=Math.min(window.devicePixelRatio||1,CONFIG.maxPixelRatio),w=Math.max(1,Math.floor(window.innerWidth*dpr)),h=Math.max(1,Math.floor(window.innerHeight*dpr));
+    if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h;this.gl.viewport(0,0,w,h);}this.projection=Mat4.perspective(CONFIG.fov,w/h,CONFIG.near,CONFIG.far);
+  }
+  createBatch(data){
+    const gl=this.gl,create=(array,size)=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(array),gl.STATIC_DRAW);return {buffer:b,size};};
+    return {p:create(data.p,3),n:create(data.n,3),c:create(data.c,3),g:create(data.g,1),count:data.p.length/3};
+  }
+  setScene(scene){this.staticBatch=this.createBatch(scene.staticData);this.waterBatch=this.createBatch(scene.waterData);this.repairBatch=this.createBatch(scene.repairData);this.gateBatch=this.createBatch(scene.gateData);this.doorBatch=this.createBatch(scene.doorData);this.ctlBatch=this.createBatch(scene.ctlData);this.creatureBatch=this.createBatch(scene.creatureData);this.lampBatches=(scene.lampData||[]).map(d=>this.createBatch(d));this.floodBatches=(scene.floodData||[]).map(d=>this.createBatch(d));}
+  _bindBatch(batch){
+    const gl=this.gl,L=this.loc;
+    for(const [key,attr] of [['p',L.pos],['n',L.norm],['c',L.color],['g',L.glow]]){gl.bindBuffer(gl.ARRAY_BUFFER,batch[key].buffer);gl.enableVertexAttribArray(attr);gl.vertexAttribPointer(attr,batch[key].size,gl.FLOAT,false,0,0);}
+    gl.drawArrays(gl.TRIANGLES,0,batch.count);
+  }
+  render(camera,world,elapsed){
+    const gl=this.gl,L=this.loc;
+    if(!this.staticBatch)return;
+    this.resizeIfNeeded();
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(this.program);
+    const eye=[camera.x,camera.y,camera.z],dir=camera.direction;
+    const view=Mat4.lookAt(eye,[eye[0]+dir[0],eye[1]+dir[1],eye[2]+dir[2]]);
+    const flicker=1.0-(Math.sin(elapsed*.73)*.008)-(Math.sin(elapsed*4.13)>0.997?.12:0);
+    gl.uniformMatrix4fv(L.proj,false,this.projection);gl.uniformMatrix4fv(L.view,false,view);gl.uniform3fv(L.camera,eye);gl.uniform3fv(L.lightDir,dir);gl.uniform1f(L.time,elapsed);gl.uniform1f(L.flicker,Math.max(.72,flicker)*(world.flashMul||1));const dr=world.dread||0;gl.uniform3f(L.fog,.027+dr*.02,.044-dr*.012,.042-dr*.014);gl.uniform1f(L.dread,dr);gl.uniform3f(L.off,0,0,0);gl.uniform2f(L.rot,1,0);gl.uniform1f(L.sway,0);gl.uniform1f(L.stretch,0);
+    this._bindBatch(this.staticBatch);
+    if(world.waterOn&&this.waterBatch.count>0)this._bindBatch(this.waterBatch);
+    if(world.repaired&&this.repairBatch&&this.repairBatch.count>0)this._bindBatch(this.repairBatch);
+    if(!world.gateOpen&&this.gateBatch&&this.gateBatch.count>0)this._bindBatch(this.gateBatch);
+    if(!world.doorOpen&&this.doorBatch&&this.doorBatch.count>0)this._bindBatch(this.doorBatch);
+    if(!world.ctlOpen&&this.ctlBatch&&this.ctlBatch.count>0)this._bindBatch(this.ctlBatch);
+    this.lampBatches.forEach((lb,i)=>{if(world.lampOn&&world.lampOn[i]&&lb&&lb.count>0)this._bindBatch(lb);});
+    if(world.level===2&&world.floodStage<3){const fb=this.floodBatches[Math.min(2,world.floodStage)];if(fb&&fb.count>0)this._bindBatch(fb);}
+    if(world.creatureVisible&&world.creatureXf&&this.creatureBatch&&this.creatureBatch.count>0){const X=world.creatureXf;gl.uniform3f(L.off,X.x,X.y,X.z);gl.uniform2f(L.rot,X.rc,X.rs);gl.uniform1f(L.sway,X.sway);gl.uniform1f(L.stretch,X.stretch);this._bindBatch(this.creatureBatch);gl.uniform3f(L.off,0,0,0);gl.uniform2f(L.rot,1,0);gl.uniform1f(L.sway,0);gl.uniform1f(L.stretch,0);}
+  }
+  resizeIfNeeded(){if(this.canvas.width!==Math.floor(window.innerWidth*Math.min(window.devicePixelRatio||1,CONFIG.maxPixelRatio))||this.canvas.height!==Math.floor(window.innerHeight*Math.min(window.devicePixelRatio||1,CONFIG.maxPixelRatio)))this.resize();}
+}
+
+class AudioSystem {
+  constructor(){this.context=null;this.master=null;this.enabled=false;this.noiseSource=null;this.nodes=[];}
+  async setEnabled(enabled){
+    this.enabled=enabled;
+    if(!enabled){if(this.master)this.master.gain.setTargetAtTime(0,this.context.currentTime,.08);return;}
+    try{
+      if(!this.context){const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;this.context=new Ctx();this.master=this.context.createGain();this.master.gain.value=0;this.master.connect(this.context.destination);this._createAmbience();}
+      await this.context.resume();this.master.gain.setTargetAtTime(.42,this.context.currentTime,.18);
+    }catch(_){this.enabled=false;}
+  }
+  _createAmbience(){
+    const ctx=this.context;
+    this.amb=ctx.createGain();this.amb.gain.value=1;this.amb.connect(this.master);
+    const low=ctx.createOscillator(),lowGain=ctx.createGain();low.type='triangle';low.frequency.value=43;lowGain.gain.value=.036;low.connect(lowGain);lowGain.connect(this.amb);low.start();
+    const mid=ctx.createOscillator(),midGain=ctx.createGain();mid.type='sine';mid.frequency.value=61.5;midGain.gain.value=.011;mid.connect(midGain);midGain.connect(this.amb);mid.start();
+    const buffer=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate),data=buffer.getChannelData(0);let seed=981723;
+    for(let i=0;i<data.length;i++){seed=(seed*16807)%2147483647;data[i]=((seed/2147483647)*2-1)*.5;}
+    const noise=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),noiseGain=ctx.createGain();noise.buffer=buffer;noise.loop=true;filter.type='lowpass';filter.frequency.value=190;noiseGain.gain.value=.045;noise.connect(filter);filter.connect(noiseGain);noiseGain.connect(this.amb);noise.start();
+    // Dengung ketakutan: dua nada sub-bass sedikit berbeda frekuensi sehingga berdenyut pelan (~0,7 Hz), volumenya mengikuti tingkat 'dread'.
+    const d1=ctx.createOscillator(),d2=ctx.createOscillator(),df=ctx.createBiquadFilter();this.dGain=ctx.createGain();d1.type='sawtooth';d2.type='sawtooth';d1.frequency.value=36.7;d2.frequency.value=37.4;df.type='lowpass';df.frequency.value=95;this.dGain.gain.value=.012;d1.connect(df);d2.connect(df);df.connect(this.dGain);this.dGain.connect(this.amb);d1.start();d2.start();
+    // Dengung tinggi tipis seperti telinga berdenging; hanya naik saat makhluk dekat.
+    const ring=ctx.createOscillator();this.rGain=ctx.createGain();ring.type='sine';ring.frequency.value=6900;this.rGain.gain.value=0;ring.connect(this.rGain);this.rGain.connect(this.amb);ring.start();
+    this.nodes=[low,mid,noise,d1,d2,ring];
+  }
+
+  impact(){if(!this.enabled||!this.context)return;const ctx=this.context;for(let i=0;i<2;i++){const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='triangle';osc.frequency.setValueAtTime(112-i*18,ctx.currentTime+i*.24);osc.frequency.exponentialRampToValueAtTime(37,ctx.currentTime+i*.24+.24);gain.gain.setValueAtTime(.001,ctx.currentTime+i*.24);gain.gain.linearRampToValueAtTime(.36,ctx.currentTime+i*.24+.015);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+i*.24+.4);osc.connect(gain);gain.connect(this.master);osc.start(ctx.currentTime+i*.24);osc.stop(ctx.currentTime+i*.24+.43);}}
+  shadowCue(){
+    if(!this.enabled||!this.context)return;
+    const ctx=this.context,now=ctx.currentTime;
+    const osc=ctx.createOscillator(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
+    osc.type='sawtooth';osc.frequency.setValueAtTime(96,now);osc.frequency.exponentialRampToValueAtTime(29,now+.48);
+    filter.type='lowpass';filter.frequency.setValueAtTime(260,now);filter.frequency.exponentialRampToValueAtTime(70,now+.46);
+    gain.gain.setValueAtTime(.001,now);gain.gain.linearRampToValueAtTime(.19,now+.035);gain.gain.exponentialRampToValueAtTime(.001,now+.5);
+    osc.connect(filter);filter.connect(gain);gain.connect(this.master);osc.start(now);osc.stop(now+.52);
+    this._tone('sine',64,22,1.0,.3,0);
+    this._tone('sawtooth',190,52,.8,.06,.03,850);
+    this._burst('bandpass',2400,4,.55,.1,.04,600);
+    this._burst('bandpass',1500,3,.7,.06,.55,420);
+  }
+
+  click(){if(!this.enabled||!this.context)return;const ctx=this.context,osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(540,ctx.currentTime);osc.frequency.exponentialRampToValueAtTime(170,ctx.currentTime+.09);gain.gain.setValueAtTime(.065,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.12);osc.connect(gain);gain.connect(this.master);osc.start();osc.stop(ctx.currentTime+.13);}
+}
+
+
+Object.assign(AudioSystem.prototype,{
+  _ok(){return this.enabled&&this.context;},
+  _nb(){if(!this._nbuf){const c=this.context,b=c.createBuffer(1,c.sampleRate,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;this._nbuf=b;}return this._nbuf;},
+  _burst(type,f,q,dur,g,at=0,f2=0){if(!this._ok())return;const c=this.context,t=c.currentTime+at,s=c.createBufferSource(),fl=c.createBiquadFilter(),gn=c.createGain();s.buffer=this._nb();fl.type=type;fl.frequency.setValueAtTime(f,t);if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t+dur);fl.Q.value=q;gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(g,t+.012);gn.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl);fl.connect(gn);gn.connect(this._dest||this.master);s.start(t,Math.random()*.5);s.stop(t+dur+.05);},
+  _tone(type,f,f2,dur,g,at=0,lp=0){if(!this._ok())return;const c=this.context,t=c.currentTime+at,o=c.createOscillator(),gn=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,f2),t+dur);gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(g,t+Math.min(.03,dur/3));gn.gain.exponentialRampToValueAtTime(.0001,t+dur);let n=o;if(lp){const fl=c.createBiquadFilter();fl.type='lowpass';fl.frequency.value=lp;o.connect(fl);n=fl;}n.connect(gn);gn.connect(this._dest||this.master);o.start(t);o.stop(t+dur+.05);},
+  step(wet){const v=.85+Math.random()*.3;if(wet){this._burst('bandpass',1000*v,.7,.24,.16,0,420);this._burst('lowpass',380,.5,.16,.1);}else{this._burst('lowpass',520*v,.6,.11,.15,0,200);this._tone('sine',78*v,42,.1,.12);}},
+  footBehind(n,gap,wet){for(let i=0;i<n;i++){const at=i*gap+(Math.random()-.5)*.06,g=.05+i*.03;if(wet)this._burst('bandpass',700,.6,.22,g*1.3,at,300);else{this._burst('lowpass',360,.5,.12,g*1.5,at,150);this._tone('sine',64,40,.1,g,at);}}},
+  knock(n=3,gap=.3,g=.45,at=0){for(let i=0;i<n;i++){this._tone('sine',170,70,.1,g,at+i*gap);this._burst('bandpass',700,2,.07,g*.6,at+i*gap);}},
+  creak(){this._tone('sawtooth',170,250,.5,.05,0,700);this._tone('sawtooth',250,140,.6,.045,.45,700);this._burst('bandpass',380,6,.9,.03,0,260);},
+  clank(g=.16,at=0){this._tone('triangle',520,500,.35,g,at);this._tone('triangle',783,770,.3,g*.6,at);this._burst('highpass',3000,1,.08,g*.5,at);},
+  ladder(n=7){for(let i=0;i<n;i++)this.clank(.06+Math.random()*.03,i*.42);},
+  squeal(d=4.5){for(let t=0;t<d;t+=.9)this._tone('sawtooth',300+Math.random()*80,520,.55,.03,t,1400);this._burst('bandpass',200,1,d,.04,0,120);},
+  switchOn(){this._burst('highpass',2400,1,.06,.2);this._tone('sine',55,110,.7,.07,.05);},
+  radio(){this._burst('bandpass',1800,.9,.5,.09);[0,.15,.32].forEach(t=>this._tone('square',900+Math.random()*300,900,.05,.02,t));},
+  beep(){this._tone('square',1320,1320,.07,.03);this._tone('square',1760,1760,.07,.03,.1);},
+  drip(){const f=1100+Math.random()*700;this._tone('sine',f,f*.5,.12,.05);this._tone('sine',f*.9,f*.45,.14,.025,.2);},
+  groan(){this._tone('sawtooth',58,38,2.4,.05,0,160);},
+  drain(){this._burst('lowpass',700,.6,3.2,.12,0,120);},
+  pumpHum(v){if(!this._ok())return;const c=this.context;if(!this._ph){const o=c.createOscillator(),fl=c.createBiquadFilter(),gn=c.createGain();o.type='sawtooth';o.frequency.value=100;fl.type='lowpass';fl.frequency.value=240;gn.gain.value=0;o.connect(fl);fl.connect(gn);gn.connect(this.amb||this.master);o.start();this._ph=gn;}this._ph.gain.setTargetAtTime(v,c.currentTime,.4);},
+  line(l){if(!this._ok())return;if(/RADIO/.test(l.speaker))this.radio();else if(l.speaker==='TERMINAL')this.beep();if(/ketukan/i.test(l.text))this.knock(3,.3,.4,.6);},
+  tick(dt){if(!this._ok()||game.mode==='ending')return;const ducked=performance.now()<(this._duckUntil||0);
+    this._dr=(this._dr===undefined?3:this._dr)-dt;this._gr=(this._gr===undefined?30:this._gr)-dt;this._ev=(this._ev===undefined?24:this._ev)-dt;
+    if(this._dr<=0){this._dr=(game.level===2?2:4)+Math.random()*7;if(!ducked)this.drip();}
+    if(this._gr<=0){this._gr=30+Math.random()*30;if(!ducked)this.groan();}
+    if(this._ev<=0){this._ev=Math.max(8,32-game.dread*18)+Math.random()*14;if(!ducked&&game.mode==='playing'&&!game.action&&!game.stalk&&game.dread>.28&&game.elapsed>game.quietUntil)this.ambientEvent();}
+    const c=game.camera,d=Math.hypot(c.x-17.5,c.z+28.25);this.pumpHum(game.level===1&&game.pumpPowered&&!game.pumpOff?Math.max(0,1-d/26)*.07:0);
+    this.setDread(game.dread*(game.elapsed<game.quietUntil?.5:1),game.creatureVisible?1:(game.stalk?.5:0));}
+});
+
+class DialogueSystem {
+  constructor(){this.queue=[];this.index=0;this.onComplete=null;this.active=false;}
+  show(lines,onComplete=()=>{}){
+    this.queue=lines.slice();this.index=0;this.onComplete=onComplete;this.active=true;ui.dialogue.hidden=false;game.mode='dialogue';this.render();
+  }
+  render(){
+    const line=this.queue[this.index];if(!line)return;
+    audioSystem.line(line);ui.speaker.textContent=line.speaker;ui.text.textContent=line.text;
+    ui.note.textContent=`DIALOG TEKS · ${String(this.index+1).padStart(2,'0')}/${String(this.queue.length).padStart(2,'0')}`;
+    ui.next.textContent=this.index===this.queue.length-1?'LANJUTKAN →':'BERIKUTNYA →';
+  }
+  advance(){
+    if(!this.active)return;audioSystem.click();this.index++;
+    if(this.index>=this.queue.length){this.active=false;ui.dialogue.hidden=true;const done=this.onComplete;this.onComplete=null;if(done)done();return;}
+    this.render();
+  }
+}
+
+class ObjectiveSystem {
+  constructor(){this.step='inspect';this.waterOn=true;this.repaired=false;this.pumpPowered=false;this.gateOpen=false;}
+  setStep(step){this.step=step;this.render();saveGame();}
+  render(){
+    const descriptions={
+      inspect:['Periksa sambungan yang bocor.','Cari pipa terputus di sisi kanan saluran.'],
+      valve:['Tutup katup merah.','Putar roda katup di dinding kanan, dekat sambungan yang bocor.'],
+      trueEnding:['Pekerjaan ditolak.','Kamu memilih keselamatan dan naik kembali ke permukaan.'],
+      repair:['Pasang klem cadangan pada pipa.','Dekati celah sambungan lalu gunakan AKSI.'],
+      exit:['Kembali ke tangga dan tutup akses.','Tutup besi berada di atas tangga di ujung saluran.'],
+      ending:['Tutup akses tidak mau terbuka.',''],
+      alternate:['Cari jalur servis lain.','Periksa ujung saluran yang berlawanan dari tangga.'],
+      explore:['Jelajahi galeri persimpangan.','Ruang saringan berada di barat (kiri); ruang pompa di timur (kanan).'],
+      pumpPanel:['Periksa panel kontrol pompa.','Panel dipasang di dinding utara ruang pompa; dekati dari sisi ruang yang terbuka.'],
+      serviceGate:['Periksa gerbang bypass di ruang saringan.','Gerbang ada di dinding barat ruang saringan; jalur di baliknya menuju akses darurat.'],
+      blockedAccess:['Periksa tutup akses darurat.','Teruskan ke ujung terowongan barat, lalu gunakan AKSI di dekat tutup besi.'],
+      searchAgain:['Ikuti lorong servis timur.','Lewati ruang pompa dan teruskan sampai pintu besi di ujung lorong.'],
+      freeExplore:['Jelajahi fasilitas servis.','Peta ini mungkin tidak menunjukkan seluruh ruangan.'],
+      ch3Look:['Cari cara menyalakan panel ruang ganti.','Periksa loker dan bangku. Panel pemutus ada di dinding timur.'],
+      ch3Panel:['Pasang sekring ke panel pemutus.','Panel ada di dinding timur ruang ganti.'],
+      ch3Control:['Periksa ruang kontrol.','Pintu di timur ruang ganti sudah terbuka.'],
+      ch4Flood:['Cari katup induk untuk menguras lorong.','Lorong tergenang mengarah ke barat, menuju ruang katup.'],
+      ch5Tool:['Cari alat untuk membuka tutup akses.','Kotak peralatan servis ada di ruang pompa, dekat lemari kontrol.'],
+      ch5Return:['Kembali ke tutup akses di ujung saluran.','Naik lewat tangga masuk di utara.'],
+      ch4Exit:['Naik lewat tangga darurat.','Tangga besi ada di dinding utara ruang katup.'],
+      ch3Hatch:['Periksa palka di lantai.','Ada bunyi dari bawah. Palka ada di tengah ruang kontrol.'],
+    };
+    const text=descriptions[this.step]||descriptions.inspect;ui.objective.textContent=text[0];ui.hint.textContent=text[1];
+    let status=this.waterOn?'LAMPU KEPALA AKTIF':'LAMPU KEPALA AKTIF · ALIRAN TUTUP';if(this.pumpPowered)status+=' · POMPA AKTIF';ui.status.textContent=status;
+  }
+}
+
+class InputController {
+  constructor(){
+    this.keys=new Set();this.joyPointer=null;this.joyOrigin={x:0,y:0};this.joy={x:0,y:0};this.lookPointer=null;this.lookLast={x:0,y:0};this.suppressTap=false;
+    this._bind();
+  }
+  _bind(){
+    window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','e',' '].includes(k))e.preventDefault();this.keys.add(k);if(k==='e'&&!e.repeat)tryInteract();if(k==='n'&&!e.repeat&&(game.mode==='playing'||!document.getElementById('notesOverlay').hidden))toggleNotes();if(k==='escape'&&!document.getElementById('notesOverlay').hidden)closeNotes();else if(k==='escape'&&game.mode==='playing')setNotice('KONTROL AKTIF');},{passive:false});
+    window.addEventListener('keyup',e=>this.keys.delete(e.key.toLowerCase()));window.addEventListener('blur',()=>this.keys.clear());document.addEventListener('visibilitychange',()=>{if(document.hidden)this.keys.clear();});
+    const joy=ui.joystick;
+    joy.addEventListener('pointerdown',e=>{e.preventDefault();this.joyPointer=e.pointerId;joy.setPointerCapture(e.pointerId);const r=joy.getBoundingClientRect();this.joyOrigin={x:r.left+r.width/2,y:r.top+r.height/2};this._moveJoy(e);},{passive:false});
+    joy.addEventListener('pointermove',e=>{if(e.pointerId===this.joyPointer){e.preventDefault();this._moveJoy(e);}},{passive:false});
+    const release=e=>{if(e.pointerId===this.joyPointer){this.joyPointer=null;this.joy={x:0,y:0};ui.joyKnob.style.transform='translate(0px,0px)';}};
+    joy.addEventListener('pointerup',release);joy.addEventListener('pointercancel',release);joy.addEventListener('lostpointercapture',release);
+    const look=ui.lookPad;
+    look.addEventListener('pointerdown',e=>{if(game.mode!=='playing')return;e.preventDefault();this.lookPointer=e.pointerId;this.lookLast={x:e.clientX,y:e.clientY};look.setPointerCapture(e.pointerId);},{passive:false});
+    look.addEventListener('pointermove',e=>{if(e.pointerId!==this.lookPointer||game.mode!=='playing')return;e.preventDefault();const dx=e.clientX-this.lookLast.x,dy=e.clientY-this.lookLast.y;this.lookLast={x:e.clientX,y:e.clientY};const sens=e.pointerType==='mouse'?CONFIG.mouseSensitivity:CONFIG.touchSensitivity;game.camera.yaw+=dx*sens;game.camera.pitch=clamp(game.camera.pitch-dy*sens,CONFIG.minPitch,CONFIG.maxPitch);},{passive:false});
+    const lookEnd=e=>{if(e.pointerId===this.lookPointer)this.lookPointer=null;};look.addEventListener('pointerup',lookEnd);look.addEventListener('pointercancel',lookEnd);look.addEventListener('lostpointercapture',lookEnd);
+    // Desktop drag on the rendered world also works when cursor starts outside the right pad.
+    canvas.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||game.mode!=='playing')return;this.lookPointer=e.pointerId;this.lookLast={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});
+    canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'||e.pointerId!==this.lookPointer||game.mode!=='playing')return;const dx=e.clientX-this.lookLast.x,dy=e.clientY-this.lookLast.y;this.lookLast={x:e.clientX,y:e.clientY};game.camera.yaw+=dx*CONFIG.mouseSensitivity;game.camera.pitch=clamp(game.camera.pitch-dy*CONFIG.mouseSensitivity,CONFIG.minPitch,CONFIG.maxPitch);});
+    canvas.addEventListener('pointerup',e=>{if(e.pointerId===this.lookPointer)this.lookPointer=null;});
+    ui.action.addEventListener('click',()=>tryInteract());
+    ui.next.addEventListener('click',()=>dialogue.advance());
+    ui.start.addEventListener('click',startGame);ui.restart.addEventListener('click',restartGame);ui.continueExplore.addEventListener('click',()=>{ui.end.hidden=true;game.step='freeExplore';objectives.setStep('freeExplore');setMode('playing');setNotice('EKSPLORASI DILANJUTKAN');});
+    ui.sound.addEventListener('click',()=>toggleSound());ui.menuSound.addEventListener('click',()=>toggleSound());
+    ui.mapToggle.addEventListener('click',()=>toggleMap());ui.mapClose.addEventListener('click',()=>toggleMap(false));
+  }
+  _moveJoy(e){const max=36,dx=e.clientX-this.joyOrigin.x,dy=e.clientY-this.joyOrigin.y,l=Math.hypot(dx,dy)||1,m=Math.min(1,l/max);this.joy={x:(dx/l)*m,y:(dy/l)*m};ui.joyKnob.style.transform=`translate(${this.joy.x*max}px,${this.joy.y*max}px)`;}
+  axes(){let sx=this.joy.x,forward=-this.joy.y;if(this.keys.has('a')||this.keys.has('arrowleft'))sx-=1;if(this.keys.has('d')||this.keys.has('arrowright'))sx+=1;if(this.keys.has('w')||this.keys.has('arrowup'))forward+=1;if(this.keys.has('s')||this.keys.has('arrowdown'))forward-=1;const l=Math.hypot(sx,forward);if(l>1){sx/=l;forward/=l;}return {side:sx,forward};}
+}
+
+Object.assign(AudioSystem.prototype,{
+  duck(sec,keep=.12){if(!this._ok()||!this.amb)return;const c=this.context;this.amb.gain.cancelScheduledValues(c.currentTime);this.amb.gain.setTargetAtTime(keep,c.currentTime,.06);this._duckUntil=performance.now()+sec*1000;clearTimeout(this._dt);this._dt=setTimeout(()=>{if(this.enabled&&this.amb)this.amb.gain.setTargetAtTime(1,this.context.currentTime,.7);},sec*1000);},
+  pan(p,fn){if(!this._ok()||!this.context.createStereoPanner){fn();return;}const c=this.context,sp=c.createStereoPanner();sp.pan.value=p;sp.connect(this.master);this._dest=sp;try{fn();}finally{this._dest=null;}setTimeout(()=>{try{sp.disconnect();}catch(_){}},7000);},
+  setDread(v,ring){if(!this._ok()||!this.dGain)return;const t=this.context.currentTime;this.dGain.gain.setTargetAtTime(.012+v*.07,t,.6);this.rGain.gain.setTargetAtTime(ring*.0035,t,.15);},
+  breath(g=.07){this._burst('bandpass',900,2.5,.8,g,0,520);this._burst('bandpass',520,3,1.0,g*.8,.95,250);this._tone('sawtooth',92,58,1.6,g*.22,.05,260);},
+  heart(g=.14){this._tone('sine',64,40,.13,g,0);this._tone('sine',56,36,.15,g*.8,.2);},
+  ambientEvent(){const p=(Math.random()<.5?-1:1)*(.5+Math.random()*.4),r=Math.random();
+    if(r<.36)this.pan(p,()=>this.knock(3,.34,.1,0));
+    else if(r<.6)this.pan(p*.6,()=>this.footBehind(3+Math.floor(Math.random()*3),.6,game.level===2&&game.waterOn));
+    else if(r<.8)this.pan(p,()=>this.creak());
+    else if(game.dread>.5)this.pan(p,()=>this.breath(.05));
+    else this.pan(p,()=>this.clank(.05));}
+});
+SceneBuilder.lamps=[];SceneBuilder.raw=false;
+SceneBuilder.prototype.lamp=function(z,p,s,c,g){SceneBuilder.lamps.push({z,k:'box',p,s,c,r:[0,0,0],g});};
+function buildLampZones(){SceneBuilder.raw=true;const zs=[];for(let i=0;i<7;i++)zs.push(new SceneBuilder());for(const l of SceneBuilder.lamps){const z=l.z!==undefined?l.z:(l.p[1]<0?4:l.p[0]<13.2?0:l.p[0]<21.95?1:l.p[0]<34.2?2:3);zs[z].box(l.p,l.s,l.c,l.r,l.g);}SceneBuilder.raw=false;return zs.map(z=>z.staticData);}
+const builtScene=buildSewerScene();
+let renderer;
+try{renderer=new Renderer(canvas);renderer.setScene(builtScene);}catch(err){console.error(err);ui.error.hidden=false;ui.menu.hidden=true;}
+const audioSystem=new AudioSystem();
+const dialogue=new DialogueSystem();
+const objectives=new ObjectiveSystem();
+const input=renderer?new InputController():null;
+const game={
+  mode:'menu',elapsed:0,lastFrame:0,step:'inspect',waterOn:true,repaired:false,pumpPowered:false,gateOpen:false,doorOpen:false,ctlOpen:false,hasFuse:false,scared:false,got:{},floodStage:0,lampOn:[1,1,1,1,1,0,0],flickT:0,flashMul:1,ctlT:0,ch5:false,stalk:null,stepDist:0,ev1:false,ev2:false,ev3:false,ev4:false,tool:false,pumpOff:false,level:1,shadowTriggered:false,shadowSeen:false,creatureVisible:false,shadowLocation:'entry',lookback:null,dread:0,dreadBoost:0,quietUntil:0,blackT:0,creatureT:0,creatureXf:null,notesUnread:false,_noteCount:0,
+  camera:{x:0,y:1.62,z:5.9,yaw:0,pitch:0,direction:[0,0,-1]},
+  moveTime:0,action:null,target:null,endingShake:0,endingStart:0,toastTimer:0,sceneTime:0,
+  reset(){this.mode='menu';this.elapsed=0;this.lastFrame=0;this.step='inspect';this.waterOn=true;this.repaired=false;this.pumpPowered=false;this.gateOpen=false;this.doorOpen=false;this.ctlOpen=false;this.hasFuse=false;this.scared=false;this.got={};this.floodStage=0;this.flickT=0;this.ctlT=0;this.ch5=false;this.stalk=null;this.stepDist=0;this.ev1=false;this.ev2=false;this.ev3=false;this.ev4=false;this.tool=false;this.pumpOff=false;this.level=1;this.shadowTriggered=false;this.shadowSeen=false;this.creatureVisible=false;this.shadowLocation='entry';this.lookback=null;this.dread=0;this.dreadBoost=0;this.quietUntil=0;this.blackT=0;this.creatureT=0;this.creatureXf=null;this.notesUnread=false;this._noteCount=0;this.camera={x:0,y:1.62,z:5.9,yaw:0,pitch:0,direction:[0,0,-1]};this.moveTime=0;this.action=null;this.target=null;this.endingShake=0;this.endingStart=0;this.toastTimer=0;this.sceneTime=0;}
+};
+
+function updateCameraDirection(){const c=game.camera,cp=Math.cos(c.pitch);c.direction=[Math.sin(c.yaw)*cp,Math.sin(c.pitch),-Math.cos(c.yaw)*cp];}
+function getTargets(){
+  const T=[];
+  if(game.step==='inspect')T.push({id:'inspectPipe',point:builtScene.pipePoint,max:2.25,prompt:'PERIKSA SAMBUNGAN'});
+  if(game.step==='valve')T.push({id:'closeValve',point:builtScene.valvePoint,max:2.2,prompt:'PUTAR KATUP MERAH'});
+  if(game.step==='repair')T.push({id:'repairPipe',point:builtScene.pipePoint,max:2.25,prompt:'PASANG KLEM CADANGAN'});
+  if(game.step==='exit')T.push({id:'openHatch',point:builtScene.exitPoint,max:3.0,prompt:'COBA BUKA TUTUP AKSES'});
+  if(game.step==='valve')T.push({id:'earlyExit',point:builtScene.exitPoint,max:3.0,prompt:'NAIK TANGGA',opt:true});
+  if(game.step==='pumpPanel')T.push({id:'pumpPanel',point:builtScene.pumpPanelPoint,max:2.55,prompt:'AKTIFKAN PANEL POMPA'});
+  if(game.step==='blockedAccess')T.push({id:'blockedAccess',point:builtScene.blockedAccessPoint,max:2.4,prompt:'PERIKSA AKSES DARURAT'});
+  if(game.step==='searchAgain')T.push({id:'eastHatch',point:builtScene.eastAccessPoint,max:2.45,prompt:'PERIKSA PINTU SERVIS'});
+  const c3=['ch3Look','ch3Panel','ch3Control','ch3Hatch'].includes(game.step);
+  if(c3&&!game.got.n1)T.push({id:'noteBench',point:builtScene.notePoint,max:2.4,prompt:'BACA CATATAN',opt:true});
+  if(game.step==='ch3Look')T.push({id:'lockerFuse',point:builtScene.lockerPoint,max:2.3,prompt:'PERIKSA LOKER KUNING'});
+  if(game.step==='ch3Look'||game.step==='ch3Panel')T.push({id:'panelServis',point:builtScene.panelServisPoint,max:2.3,prompt:game.hasFuse?'PASANG SEKRING':'PERIKSA PANEL',opt:!game.hasFuse});
+  if(game.step==='ch3Control'&&!game.scared)T.push({id:'terminal',point:builtScene.terminalPoint,max:2.3,prompt:'PERIKSA TERMINAL'});
+  if((game.step==='ch3Control'||game.step==='ch3Hatch')&&!game.got.n3)T.push({id:'radioKontrol',point:builtScene.radioPoint,max:2.3,prompt:'DENGARKAN RADIO',opt:true});
+  if(game.step==='ch3Hatch')T.push({id:'hatchBaru',point:builtScene.hatchPoint,max:2.7,prompt:'BUKA PALKA LANTAI'});
+  if(game.step==='ch5Tool')T.push({id:'toolbox',point:builtScene.toolboxPoint,max:2.3,prompt:'AMBIL ALAT SERVIS'});
+  if(game.step==='ch5Return')T.push({id:'openHatch2',point:builtScene.exitPoint,max:3.0,prompt:'BUKA TUTUP AKSES'});
+  if((game.step==='ch5Tool'||game.step==='ch5Return')&&game.got.n1&&game.got.n2&&game.got.n3&&!game.pumpOff)T.push({id:'pumpKill',point:builtScene.pumpPanelPoint,max:2.3,prompt:'MATIKAN POMPA INDUK',opt:true});
+  if(game.step==='ch4Flood')T.push({id:'valveInduk',point:builtScene.valveIndukPoint,max:2.3,prompt:'PUTAR KATUP INDUK'});
+  if(game.step==='ch4Exit'){T.push({id:'ladderUp',point:builtScene.ladderUpPoint,max:2.4,prompt:'NAIK TANGGA'});T.push({id:'radioJawab',point:builtScene.radioBawahPoint,max:2.2,prompt:'JAWAB RADIO',opt:true});}
+  return T;
+}
+function findTarget(){
+  const c=game.camera,dir=c.direction;let best=null;
+  for(const t of getTargets()){
+    const dx=t.point[0]-c.x,dy=t.point[1]-c.y,dz=t.point[2]-c.z,d=length3(dx,dy,dz);if(d>t.max)continue;
+    const to=[dx/(d||1),dy/(d||1),dz/(d||1)],dot=to[0]*dir[0]+to[1]*dir[1]+to[2]*dir[2];
+    if(dot<.56)continue;
+    if(!best||d<best.distance)best={...t,distance:d,dot};
+  }
+  return best;
+}
+function setNotice(text){ui.flashNotice.textContent=text;ui.flashNotice.classList.remove('show');void ui.flashNotice.offsetWidth;ui.flashNotice.classList.add('show');}
+function setMode(mode){game.mode=mode;}
+function toggleMap(force){const open=typeof force==='boolean'?force:ui.mapOverlay.hidden;ui.mapOverlay.hidden=!open;ui.mapToggle.setAttribute('aria-expanded',String(open));ui.mapToggle.textContent=open?'PETA: BUKA':'PETA';if(open)updateMapMarker();}
+function updateMapMarker(){
+  // The plan uses the same linear world-to-map transform as the documented level layout.
+  const {originX,originY,scale}=LEVEL_LAYOUT.map;
+  const x=originX+game.camera.x*scale,y=originY-game.camera.z*scale;
+  ui.mapPlayer.setAttribute('transform',`translate(${clamp(x,5,375)} ${clamp(y,5,249)}) rotate(${180-game.camera.yaw*180/Math.PI})`);
+  const marker=ui.mapObjective;
+  const candidates=(typeof getTargets==='function'?getTargets():[]).filter(t=>t.id&&!t.opt);
+  // When the player is deciding whether to continue or return to the hatch,
+  // point at the nearest usable interaction so the optional exit stays findable.
+  const target=candidates.reduce((best,t)=>{
+    const d=Math.hypot(t.point[0]-game.camera.x,t.point[2]-game.camera.z);
+    return !best||d<best.distance?{...t,distance:d}:best;
+  },null);
+  if(target){marker.removeAttribute('hidden');marker.setAttribute('transform',`translate(${clamp(originX+target.point[0]*scale,5,375)} ${clamp(originY-target.point[2]*scale,5,249)})`);}
+  else marker.setAttribute('hidden','');
+  refreshNotesBtn();
+  const m5=document.getElementById('mapCh5');if(m5){if(game.ch5)m5.removeAttribute('display');else m5.setAttribute('display','none');}
+  const m4=document.getElementById('mapCh4');if(m4){if(game.level===2)m4.removeAttribute('display');else m4.setAttribute('display','none');}
+  const m3=document.getElementById('mapCh3'),mc=document.getElementById('mapCtl');if(m3){if(game.doorOpen)m3.removeAttribute('display');else m3.setAttribute('display','none');}
+  if(mc){mc.setAttribute('stroke',game.ctlOpen?'#8cae83':'#c18b4c');mc.setAttribute('stroke-dasharray',game.ctlOpen?'':'3 2');mc.setAttribute('stroke-width',game.ctlOpen?'1.5':'3');}
+  if(ui.mapGate){ui.mapGate.setAttribute('stroke',game.gateOpen?'#8cae83':'#c18b4c');ui.mapGate.setAttribute('stroke-dasharray',game.gateOpen?'':'3 2');ui.mapGate.setAttribute('stroke-width',game.gateOpen?'1.5':'3');}
+}
+const SHADOW_SPOT={entry:[0,0,-18.45],deep:[0,0,-32.0],office:[34.2,0,-28.25],floodA:[32.0,-4.5,-28.25],floodB:[14.9,-4.5,-28.25]};
+const DREAD_BASE={inspect:.04,valve:.07,repair:.09,exit:.12,alternate:.22,explore:.34,pumpPanel:.5,serviceGate:.5,blockedAccess:.62,searchAgain:.48,freeExplore:.3,ch3Look:.55,ch3Panel:.58,ch3Control:.66,ch3Hatch:.78,ch4Flood:.82,ch4Exit:.86,ch5Tool:.7,ch5Return:.82,trueEnding:.1};
+/* 'Dread' naik turun mengikuti progres cerita; setelah tiap kemunculan ada jeda tenang agar ketegangan sempat dilepas lalu dibangun lagi. */
+function updateDread(dt){game.dreadBoost=Math.max(0,game.dreadBoost-dt*.05);let t=Math.min(1,(DREAD_BASE[game.step]||.1)+game.dreadBoost);if(game.elapsed<game.quietUntil)t*=.55;game.dread+=(t-game.dread)*Math.min(1,dt*.5);}
+function afterCreature(quiet=14){game.quietUntil=game.elapsed+quiet;game.dreadBoost=Math.max(game.dreadBoost,.3);game.flickT=Math.max(game.flickT||0,1.2);}
+/* Makhluk selalu menghadap pemain, mendekat sedikit demi sedikit dengan gerak patah-patah (stop-motion), dan tidak pernah lebih dekat dari 1,6 m. */
+function updateCreatureXform(dt){
+  if(!game.creatureVisible){game.creatureT=0;return;}
+  game.creatureT+=dt;
+  const sp=SHADOW_SPOT[game.shadowLocation]||SHADOW_SPOT.entry,c=game.camera;
+  let dx=c.x-sp[0],dz=c.z-sp[2];const dist=Math.hypot(dx,dz)||1;dx/=dist;dz/=dist;
+  const t=Math.floor(game.creatureT*13)/13,k=Math.min(1,t/.7),lurch=Math.max(0,Math.min(dist-1.6,1.3))*k*k;
+  const jit=(Math.sin(t*61)+Math.sin(t*37.7))*.012,lat=Math.sin(t*3.1)*.07;
+  game.creatureXf={x:sp[0]+dx*lurch-dz*lat+jit,y:sp[1],z:sp[2]+dz*lurch+dx*lat,rc:dz,rs:dx,sway:Math.sin(t*5.3)*.05+(Math.sin(t*23)>.93?.16:0),stretch:.08*k};
+}
+function startLookback(){
+  if(game.shadowTriggered||game.shadowSeen)return;
+  game.shadowTriggered=true;game.mode='lookback';
+  const facingInto=Math.cos(game.camera.yaw)>=0;game.shadowLocation=facingInto?'entry':'deep';
+  game.lookback={time:0,startYaw:game.camera.yaw,startPitch:game.camera.pitch,targetYaw:facingInto?Math.PI:0,pre:1.25};
+  game.creatureVisible=false;game.flickT=1.6;setNotice('ADA SUARA DI BELAKANGMU');audioSystem.duck(1.5,.08);audioSystem.footBehind(4,.34,false);
+}
+/* Urutan kemunculan: sunyi + langkah (antisipasi) -> menoleh -> makhluk terlihat sekitar 1 detik -> lampu mati -> makhluk sudah hilang saat lampu kembali. */
+function updateLookback(dt){
+  const e=game.lookback;if(!e)return;e.time+=dt;
+  const t=e.time,pre=e.pre||.9,T=.32,H=e.hold||1.05,vis0=pre+T,blk=vis0+H-.28,end=vis0+H+.22;
+  if(!e.dark)updateLamps(dt);
+  if(t<pre){
+    game.camera.yaw=e.startYaw+Math.sin(t*7)*.006;
+    if(!e.c1&&t>pre-.5){e.c1=true;audioSystem.breath(.06);}
+  }else{
+    const k=clamp((t-pre)/T,0,1),ease=k*k*(3-2*k);
+    const target=e.targetYaw+Math.round((e.startYaw-e.targetYaw)/(Math.PI*2))*Math.PI*2;
+    game.camera.yaw=e.startYaw+(target-e.startYaw)*ease;game.camera.pitch=e.startPitch*(1-ease)+.1*ease;
+    if(t>=vis0&&!e.shown){e.shown=true;game.creatureVisible=true;game.creatureT=0;audioSystem.shadowCue();game.endingShake=Math.max(game.endingShake,.4);}
+    if(t>=blk&&!e.dark){e.dark=true;e.darkAt=t;}
+    if(e.dark){game.lampOn=[0,0,0,0,0,0,0];game.flashMul=.06;if(t>=e.darkAt+.08)game.creatureVisible=false;}
+  }
+  if(t<end)return;
+  game.creatureVisible=false;game.lookback=null;game.mode='playing';afterCreature();
+  if(e.done){e.done();return;}
+  game.shadowSeen=true;game.step='pumpPanel';objectives.setStep('pumpPanel');dialogue.show([
+    {speaker:'KAMU',text:'...APA ITU?!'},
+    {speaker:'NARASI',text:'Kamu menoleh tepat waktu untuk melihat sosok hitam berdiri di mulut lorong. Bentuknya terlalu kurus, lengannya terlalu panjang, dan kepalanya miring seperti sedang mendengarkan.'},
+    {speaker:'NARASI',text:'Lampu mati sekejap. Saat menyala lagi, lorong itu kosong. Hanya bau besi basah yang tertinggal.'}
+  ],()=>{game.step='pumpPanel';objectives.setStep('pumpPanel');setMode('playing');setNotice('RUANG POMPA · CABANG KANAN');});
+}
+function showIntro(){
+  dialogue.show([
+    {speaker:'RADIO · MANDOR',text:'Pipa saluran timur. Sambungan dekat katup merah pecah.'},
+    {speaker:'RADIO · MANDOR',text:'Tutup alirannya, pasang klem cadangan, lalu naik lewat tutup akses yang sama. Hati-hati, air di bawah sedang naik.'},
+    {speaker:'KAMU',text:'Diterima. Aku mulai sekarang.'}
+  ],()=>{game.step='inspect';objectives.setStep('inspect');setMode('playing');});
+}
+const SAVE_KEY='saluran04_save_v1',SAVE_FIELDS=['waterOn','repaired','pumpPowered','gateOpen','doorOpen','ctlOpen','hasFuse','scared','ch5','ev1','ev2','ev3','ev4','tool','pumpOff','shadowTriggered','shadowSeen','level','step','got','floodStage'];
+function readSave(){try{return JSON.parse(localStorage.getItem(SAVE_KEY));}catch(_){return null;}}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(_){}}
+const SLOT_KEYS=[SAVE_KEY,'saluran04_slot1','saluran04_slot2','saluran04_slot3'];
+function snapshot(){const s={v:1,t:Date.now(),label:(document.getElementById('objectiveText')||{}).textContent||''};for(const f of SAVE_FIELDS)s[f]=game[f];s.cam={x:game.camera.x,z:game.camera.z,yaw:game.camera.yaw};return s;}
+function validSave(s){return !!(s&&typeof s.step==='string'&&s.cam&&isFinite(s.cam.x)&&isFinite(s.cam.z)&&isFinite(s.cam.yaw)&&(s.level===1||s.level===2));}
+function saveGame(){try{if(['menu','ending','paused'].includes(game.mode)||game.step==='inspect'||game.step==='freeExplore')return;localStorage.setItem(SAVE_KEY,JSON.stringify(snapshot()));}catch(_){}}
+function encodeSave(s){return btoa(unescape(encodeURIComponent(JSON.stringify(s))));}
+function decodeSave(c){try{const s=JSON.parse(decodeURIComponent(escape(atob(String(c).trim()))));return validSave(s)?s:null;}catch(_){return null;}}
+async function loadState(s){if(!validSave(s))return false;
+  ui.menu.hidden=true;ui.end.hidden=true;ui.dialogue.hidden=true;dialogue.active=false;ui.progress.classList.remove('visible');ui.hud.hidden=false;ui.hudRight.hidden=false;ui.reticle.hidden=false;ui.help.hidden=false;
+  game.reset();for(const f of SAVE_FIELDS)if(s[f]!==undefined)game[f]=s[f];game.got=s.got||{};game._noteCount=noteKeys().length;game.action=null;game.lookback=null;game.stalk=null;game.creatureVisible=false;
+  Object.assign(game.camera,{x:s.cam.x,z:s.cam.z,yaw:s.cam.yaw,pitch:0,y:game.level===2?-2.88:1.62});updateCameraDirection();
+  objectives.waterOn=game.waterOn;objectives.repaired=game.repaired;objectives.pumpPowered=game.pumpPowered;objectives.gateOpen=game.gateOpen;
+  game.mode='playing';objectives.setStep(game.step);if(soundWanted)await audioSystem.setEnabled(true);setNotice('SHIFT DILANJUTKAN');updateMapMarker();return true;}
+async function continueGame(){const s=readSave();if(s)await loadState(s);}
+function readSlot(k){try{return JSON.parse(localStorage.getItem(k));}catch(_){return null;}}
+let saveFrom='menu',savePrev='playing';const $s=id=>document.getElementById(id);
+function renderSlots(){const inGame=saveFrom==='game';$s('saveRows').innerHTML=SLOT_KEYS.map((k,i)=>{const s=readSlot(k),info=s?`${s.label||s.step} · ${new Date(s.t||0).toLocaleString('id-ID')}`:'kosong';return `<div class="saveRow"><span>${i?'SLOT '+i:'OTOMATIS'}<small>${info}</small></span>${i&&inGame?`<button class="saveBtn" data-a="save" data-k="${k}">SIMPAN</button>`:''}<button class="saveBtn" data-a="load" data-k="${k}" ${s?'':'disabled'}>MUAT</button></div>`;}).join('');}
+function openSaves(from){saveFrom=from;if(from==='game'){if(game.mode!=='playing'||game.action)return;savePrev=game.mode;game.mode='paused';}$s('saveCode').value='';renderSlots();$s('saveOverlay').hidden=false;}
+function closeSaves(){$s('saveOverlay').hidden=true;if(saveFrom==='game'&&game.mode==='paused')game.mode=savePrev;}
+$s('saveOverlay').addEventListener('click',async e=>{const b=e.target.closest('button[data-a]'),id=e.target.id;
+  if(b){const k=b.dataset.k;if(b.dataset.a==='save'){try{localStorage.setItem(k,JSON.stringify(snapshot()));}catch(_){setNotice('GAGAL MENYIMPAN');return;}renderSlots();setNotice('TERSIMPAN');}else{const s=readSlot(k);if(await loadState(s))$s('saveOverlay').hidden=true;}}
+  else if(id==='saveClose')closeSaves();
+  else if(id==='saveExport'){const s=saveFrom==='game'?snapshot():readSlot(SAVE_KEY);if(!s){$s('saveCode').value='Tidak ada simpanan.';return;}const c=encodeSave(s);$s('saveCode').value=c;$s('saveCode').select();try{await navigator.clipboard.writeText(c);setNotice('KODE DISALIN');}catch(_){}}
+  else if(id==='saveImport'){const s=decodeSave($s('saveCode').value);if(!s){setNotice('KODE TIDAK VALID');return;}if(await loadState(s))$s('saveOverlay').hidden=true;}});
+$s('saveToggle').addEventListener('click',()=>openSaves('game'));$s('slotsOpen').addEventListener('click',()=>openSaves('menu'));
+document.getElementById('continueSave').addEventListener('click',continueGame);
+function noteKeys(){return ['n1','n2','n3'].filter(k=>game.got[k]);}
+function refreshNotesBtn(){const b=document.getElementById('notesToggle');if(!b)return;const n=noteKeys().length;if(n>game._noteCount){game._noteCount=n;game.notesUnread=true;setNotice('CATATAN BARU · BISA DIBACA ULANG');}b.hidden=!n;b.textContent=n?`CATATAN (${n})`:'CATATAN';b.classList.toggle('unread',!!game.notesUnread);}
+let notesPrev='playing';
+function renderNotes(){const ks=noteKeys();document.getElementById('notesList').innerHTML=ks.length?ks.map(k=>`<div class="noteItem"><h4>${NOTE_TITLES[k]}</h4>${NOTES[k].map(l=>`<p>${l.text}</p>`).join('')}</div>`).join(''):'<div class="noteEmpty">Belum ada catatan yang ditemukan.</div>';}
+function openNotes(){if(game.mode!=='playing'||game.action)return;notesPrev=game.mode;game.mode='paused';renderNotes();document.getElementById('notesOverlay').hidden=false;game.notesUnread=false;refreshNotesBtn();audioSystem.click();}
+function closeNotes(){document.getElementById('notesOverlay').hidden=true;if(game.mode==='paused')game.mode=notesPrev;}
+function toggleNotes(){document.getElementById('notesOverlay').hidden?openNotes():closeNotes();}
+document.getElementById('notesToggle').addEventListener('click',toggleNotes);document.getElementById('notesClose').addEventListener('click',closeNotes);
+try{document.getElementById('continueSave').hidden=!readSave();}catch(_){}
+async function startGame(){
+  if(game.mode!=='menu')return;ui.menu.hidden=true;ui.hud.hidden=false;ui.hudRight.hidden=false;ui.reticle.hidden=false;ui.help.hidden=false;
+  if(soundWanted)await audioSystem.setEnabled(true);showIntro();
+}
+function startRepair(){audioSystem.clank(.12);game.action={id:'repair',time:0,duration:CONFIG.repairSeconds};ui.progress.classList.add('visible');ui.progressFill.style.width='0%';ui.progressLabel.textContent='MEMASANG KLEM...';setNotice('KLEM CADANGAN');audioSystem.click();}
+function startDrain(){audioSystem.squeal(4.5);game.action={id:'drain',time:0,duration:4.5};ui.progress.classList.add('visible');ui.progressFill.style.width='0%';ui.progressLabel.textContent='MEMUTAR KATUP INDUK...';setNotice('KATUP INDUK');audioSystem.click();}
+function onDrained(){game.floodStage=3;game.waterOn=false;objectives.waterOn=false;audioSystem.impact();audioSystem.drain();game.endingShake=.7;dialogue.show([{speaker:'NARASI',text:'Gemuruh turun dari pipa-pipa di atas. Air di lorong surut, menarik lumpur dan sesuatu yang berbentuk seperti sepatu kerja.'},{speaker:'RADIO · ???',text:'...kamu... sudah di atas...?'},{speaker:'KAMU',text:'Tangga ada di dinding selatan. Naik saja. Jangan dengarkan radio itu.'}],()=>{game.step='ch4Exit';objectives.setStep('ch4Exit');setMode('playing');updateMapMarker();});}
+function flk(t,s){return (Math.sin(t*s)+Math.sin(t*s*1.7+1.3))>.55?0:1;}
+function updateLamps(dt){const t=performance.now()/1000;game.flickT=Math.max(0,(game.flickT||0)-dt);if(!game.ctlOpen)game.ctlT=0;else game.ctlT+=dt;
+  game._rf=(game._rf===undefined?12:game._rf)-dt;if(game._rf<=0){game._rf=14+Math.random()*20;game.flickT=Math.max(game.flickT,.45);}
+  const F=game.flickT>0,bad=F?flk(t,31):1,unstable=game.doorOpen&&!game.ctlOpen;
+  game.lampOn=[bad,(game.pumpPowered&&!game.pumpOff)?bad:0,(unstable?flk(t,9):1)*bad,game.ctlOpen?(game.ctlT<1.4?flk(t,23):1)*bad:0,bad,unstable?1:0,game.ctlOpen?1:0];
+  game.flashMul=F?.25+.75*flk(t,27):1;game.blackT=Math.max(0,(game.blackT||0)-dt);if(game.blackT>0){game.lampOn=[0,0,0,0,0,0,0];game.flashMul=.06;}}
+function startStalk(loc,fx,fz,msg){game.flickT=2.2;const c=game.camera;game.stalk={loc,yaw:Math.atan2(fx-c.x,-(fz-c.z)),t:0,state:'steps',msg};audioSystem.duck(3.2,.25);audioSystem.footBehind(5,.6,game.level===2&&game.waterOn);}
+function updateStalk(dt){const s=game.stalk;if(!s||game.mode!=='playing')return;s.t+=dt;
+  if(s.state==='steps'){
+    s.hb=(s.hb||0)-dt;if(s.hb<=0&&s.t>.8){s.hb=.95;audioSystem.heart(.09+Math.min(.1,s.t*.025));}
+    let d=(game.camera.yaw-s.yaw)%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;
+    if(s.t>1.5&&Math.abs(d)<.8){s.state='flash';s.f=0;game.shadowLocation=s.loc;game.creatureVisible=true;game.creatureT=0;audioSystem.shadowCue();game.endingShake=Math.max(game.endingShake,.3);}
+    else if(s.t>5.2){game.stalk=null;game.quietUntil=game.elapsed+8;}
+  }else{
+    s.f+=dt;if(s.f>.55&&!s.bo){s.bo=true;game.blackT=.35;}
+    if(s.f>.64)game.creatureVisible=false;
+    if(s.f>.95){game.stalk=null;afterCreature();if(s.msg)setNotice(s.msg);}
+  }}
+function startScare(done,yaw=-Math.PI/2,loc='office',msg='KETUKAN DARI BELAKANG'){game.flickT=1.6;
+  game.mode='lookback';game.scared=true;game.shadowLocation=loc;game.creatureVisible=false;game.endingShake=.6;
+  game.lookback={time:0,startYaw:game.camera.yaw,startPitch:game.camera.pitch,targetYaw:yaw,done,pre:.6};
+  setNotice(msg);audioSystem.duck(.7,.1);audioSystem.knock(3,.26,.38);
+}
+function showEnding(kind){
+  const trueEnding=kind==='true';
+  ui.endEyebrow.textContent=trueEnding?'SALURAN 04 · TRUE ENDING':'SALURAN 04 · CATATAN DIHENTIKAN';
+  ui.endTitle.textContent=trueEnding?'TRUE ENDING':'BERSAMBUNG';
+  ui.endSubtitle.textContent=trueEnding
+    ?'Kamu menolak pekerjaan sebelum masuk lebih jauh. Di permukaan, kamu mengakui kepada mandor bahwa ini pekerjaan saluran pertamamu dan kamu belum siap. Pekerjaan ditinggalkan; kamu pulang tanpa mengetahui apa yang menunggu di dalam.'
+    :'Dari balik pintu servis terdengar ketukan—dari sisi yang seharusnya berada di luar. Peta fasilitas ini tidak menunjukkan ruangan apa pun di baliknya.';
+  if(kind==='bab3'){ui.endEyebrow.textContent='SALURAN 04 · AKHIR BAB 3';ui.endSubtitle.textContent='Palka di lantai ruang kontrol terbuka ke tangga yang tidak ada di peta. Ketukan dari bawah berhenti. Lalu seseorang mulai menaiki tangga itu.';}
+  if(kind==='bab4'){ui.endEyebrow.textContent='SALURAN 04 · AKHIR BAB 4';ui.endSubtitle.textContent='Kamu keluar dari saluran, tetapi jalanan di atas bukan jalan yang kamu masuki. Lampu kota menyala dalam pola yang salah.';}
+  if(kind==='bad'){ui.endEyebrow.textContent='SALURAN 04 · SHIFT BERAKHIR';ui.endTitle.textContent='DITEMUKAN';ui.endSubtitle.textContent='Shift 04 tercatat selesai. Pekerja terdaftar: kamu.';}
+  if(kind==='escape'){ui.endEyebrow.textContent='SALURAN 04 · TAMAT';ui.endTitle.textContent='SELAMAT';ui.endSubtitle.textContent='Tutup akses terbuka dan kota di atas tampak normal. Tetapi di laporan shift, namamu tercatat selesai bertugas tiga jam lalu. Di bawah sana, ketukan terus berlanjut tanpa saksi. Catatan para pekerja sebelumnya masih tersebar di saluran itu.';}
+  if(kind==='true2'){ui.endEyebrow.textContent='SALURAN 04 · TRUE ENDING';ui.endTitle.textContent='TRUE ENDING';ui.endSubtitle.textContent='Pompa induk mati dan ketukan berhenti untuk pertama kalinya sejak shift 01. Di permukaan, mandor yang asli menunggu dengan buku log kosong. Shift 04 dicoret dari jadwal, dan saluran itu hilang dari peta kota.';}
+  if(['true','bad','escape','true2'].includes(kind))clearSave();
+  ui.continueExplore.hidden=trueEnding||['bad','escape','true2'].includes(kind);
+  ui.continueExplore.textContent='LANJUTKAN EKSPLORASI';
+  ui.restart.textContent=trueEnding?'ULANGI SHIFT':'ULANGI SHIFT';
+  ui.end.dataset.ending=kind;ui.end.hidden=false;game.mode='ending';
+}
+function tryInteract(){
+  if(game.mode==='dialogue'){dialogue.advance();return;}
+  if(game.mode!=='playing')return;
+  if(game.action)return;
+  const t=game.target||findTarget();if(!t){audioSystem.click();setNotice('TIDAK ADA OBJEK DALAM JANGKAUAN');return;}
+  if(t.id==='inspectPipe'){
+    dialogue.show([{speaker:'KAMU',text:'Klem sambungan pecah. Tekanan air masih mendorong keluar dari celah itu.'},{speaker:'KAMU',text:'Ini pertama kalinya aku bekerja di dalam selokan. Bau, gelap, dan suara airnya jauh lebih buruk daripada yang kubayangkan.'},{speaker:'KAMU',text:'Katup merah ada di depan. Tekanannya harus turun dulu sebelum klem bisa dipasang.'},{speaker:'NARASI',text:'Tanganmu dingin. Di belakangmu, tangga terasa lebih dekat daripada seharusnya.'}],()=>{game.step='valve';objectives.setStep('valve');setMode('playing');updateMapMarker();});
+  }else if(t.id==='earlyExit'){
+    audioSystem.impact();
+    dialogue.show([
+      {speaker:'KAMU',text:'Tidak. Aku belum siap melakukan pekerjaan ini sendirian. Ini pertama kalinya aku masuk selokan—aku tidak tahu apa yang ada lebih jauh di sini.'},
+      {speaker:'KAMU',text:'Maaf, Pak. Saya keluar. Saya tidak akan meneruskan pekerjaan ini malam ini.'},
+      {speaker:'NARASI',text:'Kamu menaiki tangga dan mengangkat tutup besi dari bawah. Kali ini tutupnya bergeser pada tarikan pertama. Udara malam menyentuh wajahmu lagi.'},
+      {speaker:'RADIO · MANDOR',text:'Kamu sudah di atas? Ada masalah?'},
+      {speaker:'KAMU',text:'Saya menolak lanjut, Pak. Ini pekerjaan selokan pertama saya. Saya tidak siap masuk lebih dalam.'},
+      {speaker:'RADIO · MANDOR',text:'...Baik. Menjauhlah dari akses itu. Aku akan cari orang lain untuk menyelesaikannya.'},
+      {speaker:'NARASI',text:'Kamu pergi dari lokasi sebelum sesuatu sempat terjadi. Pekerjaan tetap belum selesai—tetapi malam itu, kamu pulang.'}
+    ],()=>{game.step='trueEnding';objectives.setStep('trueEnding');showEnding('true');});
+  }else if(t.id==='closeValve'){audioSystem.squeal(2.2);
+    game.waterOn=false;objectives.waterOn=false;audioSystem.impact();
+    dialogue.show([{speaker:'KAMU',text:'Katupnya berat sekali... ayo.'},{speaker:'NARASI',text:'Roda katup berhenti dengan bunyi logam pendek. Semburan di sambungan mereda, lalu putus.'}],()=>{game.step='repair';objectives.setStep('repair');setMode('playing');});
+  }else if(t.id==='repairPipe'){
+    startRepair();
+  }else if(t.id==='openHatch'){
+    game.action=null;game.endingShake=1;game.endingStart=game.elapsed;audioSystem.impact();
+    dialogue.show([{speaker:'KAMU',text:'...Hah? Macet?'},{speaker:'KAMU',text:'Tunggu. Ini bukan macet biasa.'},{speaker:'NARASI',text:'Kamu menarik lagi. Tutup besi itu tidak bergerak sedikit pun—seolah ada sesuatu yang menahannya dari sisi lain.'},{speaker:'KAMU',text:'Aku tidak bisa naik lewat sini. Pasti ada pintu servis lain di ujung saluran.'}],()=>{game.step='alternate';objectives.setStep('alternate');setMode('playing');setNotice('JALUR SERVIS BARU TERBUKA DI PETA');});
+  }else if(t.id==='pumpPanel'){
+    game.flickT=1.4;game.pumpPowered=true;game.gateOpen=true;objectives.pumpPowered=true;objectives.gateOpen=true;updateMapMarker();audioSystem.impact();
+    dialogue.show([{speaker:'KAMU',text:'Panelnya masih hidup? Kukira seluruh jalur ini sudah mati.'},{speaker:'NARASI',text:'Saklar utama jatuh dengan bunyi keras. Di sisi lain ruang persimpangan, gerbang servis terangkat beberapa sentimeter lalu terseret ke atas.'},{speaker:'KAMU',text:'Baik. Aku coba jalur di balik gerbang itu.'}],()=>{game.step='serviceGate';objectives.setStep('serviceGate');setMode('playing');setNotice('GERBANG RUANG SARINGAN TERBUKA');});
+  }else if(t.id==='blockedAccess'){
+    audioSystem.impact();
+    dialogue.show([{speaker:'KAMU',text:'Ada tangga di balik pintu ini. Harusnya langsung menuju permukaan.'},{speaker:'NARASI',text:'Dari sisi lain terdengar bunyi kerikil dan beton bergeser. Tutup aksesnya terjepit oleh timbunan yang terlalu berat untuk dibuka dari sini.'},{speaker:'KAMU',text:'Jalan ini buntu. Aku harus mencari sambungan servis lain.'}],()=>{game.step='searchAgain';objectives.setStep('searchAgain');setMode('playing');setNotice('LORONG TIMUR MASIH BERLANJUT');});
+  }else if(t.id==='eastHatch'){
+    audioSystem.shadowCue();
+    dialogue.show([{speaker:'KAMU',text:'Pintu ini tidak terkunci. Bahkan bautnya sudah hilang.'},{speaker:'NARASI',text:'Kamu mendorongnya sedikit. Dari celah gelap di balik pintu, terdengar bunyi kota yang jauh—lalu tiga ketukan pelan, tepat di depanmu.'},{speaker:'KAMU',text:'...Tidak. Itu datang dari sisi yang salah.'}],()=>{game.doorOpen=true;audioSystem.creak();audioSystem.clank(.12,.5);setNotice('PINTU SERVIS TERBUKA');dialogue.show([{speaker:'NARASI',text:'Engsel berderit. Lampu di dalam menyala sendiri, redup, lalu stabil. Ketukan berhenti begitu pintu terbuka.'}],()=>{game.step='ch3Look';objectives.setStep('ch3Look');setMode('playing');updateMapMarker();});});
+  }else if(t.id==='noteBench'){
+    game.got.n1=1;dialogue.show(NOTES.n1,()=>setMode('playing'));
+  }else if(t.id==='lockerFuse'){
+    game.hasFuse=true;game.got.n2=1;audioSystem.clank(.1);dialogue.show([{speaker:'KAMU',text:'Loker bertanda kuning. Tidak terkunci.'},{speaker:'NARASI',text:'Di dalamnya ada sekring keramik besar dan secarik kertas terlipat.'},{speaker:'CATATAN · LOKER 07',text:'"Jangan jawab ketukannya. Kalau radio memanggil namamu dua kali, itu bukan mandor."'}],()=>{game.step='ch3Panel';objectives.setStep('ch3Panel');setMode('playing');updateMapMarker();});
+  }else if(t.id==='panelServis'){
+    if(!game.hasFuse){dialogue.show([{speaker:'KAMU',text:'Slot sekringnya kosong. Pasti ada cadangan di sekitar sini.'}],()=>setMode('playing'));}
+    else{game.ctlOpen=true;audioSystem.switchOn();setTimeout(()=>audioSystem.creak(),900);game.endingShake=.5;dialogue.show([{speaker:'KAMU',text:'Sekring masuk dengan bunyi klik berat.'},{speaker:'NARASI',text:'Dengung listrik naik dari balik dinding. Di timur ruangan, pintu geser terbuka lebar lalu berhenti.'}],()=>{game.step='ch3Control';objectives.setStep('ch3Control');setMode('playing');setNotice('PINTU RUANG KONTROL TERBUKA');updateMapMarker();});}
+  }else if(t.id==='terminal'){
+    dialogue.show([{speaker:'TERMINAL',text:'LOG SHIFT — SALURAN 04. Shift 01: selesai. Shift 02: selesai. Shift 03: selesai.'},{speaker:'TERMINAL',text:'Shift 04: SEDANG BERJALAN. Pekerja terdaftar: kamu.'},{speaker:'KAMU',text:'Aku bahkan belum mengisi daftar hadir di sini...'},{speaker:'NARASI',text:'Di belakangmu, tiga ketukan pelan jatuh tepat di bingkai pintu.'}],()=>startScare(()=>{game.step='ch3Hatch';objectives.setStep('ch3Hatch');dialogue.show([{speaker:'KAMU',text:'Tidak ada siapa-siapa. Tapi pintu itu tadi terasa lebih sempit.'},{speaker:'NARASI',text:'Dari bawah palka di lantai, ketukan membalas. Tiga kali. Persis di bawah sepatumu.'}],()=>{setMode('playing');updateMapMarker();});}));
+  }else if(t.id==='radioKontrol'){
+    game.got.n3=1;audioSystem.shadowCue();dialogue.show([{speaker:'RADIO · MANDOR',text:'Pipa saluran timur. Sambungan dekat katup merah pecah.'},{speaker:'NARASI',text:'Persis sama dengan transmisi pertama tadi, sampai jeda napasnya.'},{speaker:'KAMU',text:'Kabel radio ini terputus. Siapa yang bicara?'},{speaker:'KAMU',text:'Setiap kali radio ini bicara, dengung pompa terdengar makin keras.'}],()=>setMode('playing'));
+  }else if(t.id==='hatchBaru'){
+    audioSystem.clank(.2);audioSystem.creak();dialogue.show([{speaker:'KAMU',text:'Palkanya ringan. Terlalu ringan untuk sesuatu yang terus diketuk dari bawah.'},{speaker:'NARASI',text:'Tangga besi turun ke gelap yang tidak ada di peta mana pun. Dari dasarnya, seseorang menarik napas panjang, lalu memanggil dengan suara mandor.'}],()=>{audioSystem.ladder(6);game.level=2;game.camera.x=36.8;game.camera.z=-28.25;game.camera.y=-2.88;game.camera.yaw=-Math.PI/2;game.camera.pitch=0;game.waterOn=true;objectives.waterOn=true;game.step='ch4Flood';objectives.setStep('ch4Flood');dialogue.show([{speaker:'NARASI',text:'Tangga besi berakhir di lantai beton yang basah. Di barat, lorong panjang tergenang sampai ke mata kaki.'},{speaker:'KAMU',text:'Katup induk pasti ada di ujung sana. Kalau airnya dikuras, aku bisa melihat jalan keluar.'}],()=>{setMode('playing');setNotice('LEVEL BAWAH · LORONG BANJIR');updateMapMarker();});});
+  }else if(t.id==='valveInduk'){
+    startDrain();
+  }else if(t.id==='ladderUp'){
+    dialogue.show([{speaker:'NARASI',text:'Radio memanggil sekali, dari bawah. Lalu sekali lagi, lebih dekat. Kamu terus memanjat tanpa menoleh.'},{speaker:'NARASI',text:'Tangga berakhir di lubang lantai sebuah ruang kecil. Ruang akses darurat ini ada di utara koridor servis timur, dan tidak ada di peta awalmu.'}],()=>{audioSystem.ladder(8);game.ch5=true;game.level=1;game.camera.x=11.5;game.camera.z=-25.95;game.camera.y=1.62;game.camera.yaw=0;game.camera.pitch=0;game.step='ch5Tool';objectives.setStep('ch5Tool');setMode('playing');setNotice('KEMBALI KE SALURAN UTAMA');updateMapMarker();});
+  }else if(t.id==='toolbox'){
+    game.tool=true;audioSystem.clank(.14);dialogue.show([{speaker:'KAMU',text:'Linggis dan senter cadangan. Cukup untuk membuka tutup yang macet.'},{speaker:'NARASI',text:'Di dasar kotak ada gantungan kunci berlabel SHIFT 04. Talinya masih basah.'}],()=>{game.step='ch5Return';objectives.setStep('ch5Return');setMode('playing');updateMapMarker();});
+  }else if(t.id==='pumpKill'){
+    game.pumpOff=true;audioSystem.impact();game.endingShake=.6;dialogue.show([{speaker:'KAMU',text:'Ini yang catatan-catatan itu maksud. Semua ketukan itu bukan dari pipa.'},{speaker:'NARASI',text:'Dengung pompa induk mati. Untuk pertama kalinya sejak kamu turun, saluran ini benar-benar sunyi.'}],()=>setMode('playing'));
+  }else if(t.id==='openHatch2'){
+    audioSystem.impact();dialogue.show([{speaker:'NARASI',text:'Linggis masuk ke celah tutup. Besi berderit, lalu terbuka. Udara malam masuk.'}],()=>{game.step='freeExplore';objectives.setStep('freeExplore');showEnding(game.pumpOff&&game.got.n1&&game.got.n2&&game.got.n3?'true2':'escape');});
+  }else if(t.id==='radioJawab'){
+    audioSystem.shadowCue();game.endingShake=1;dialogue.show([{speaker:'KAMU',text:'Halo? Mandor?'},{speaker:'RADIO · ???',text:'Akhirnya kamu menjawab.'},{speaker:'NARASI',text:'Suara itu keluar dari radio, dan dari tepat di belakang telingamu.'}],()=>{showEnding('bad');});
+  }
+}
+function updateTargetUI(){
+  if(game.mode!=='playing'||game.action){game.target=null;ui.action.disabled=true;ui.action.innerHTML='AKSI<span class="keyHint">—</span>';ui.target.classList.remove('visible');ui.reticle.classList.remove('active');return;}
+  const t=findTarget();game.target=t;ui.action.disabled=!t;
+  ui.action.innerHTML=t?`AKSI<span class="keyHint">E / TAP</span>`:`AKSI<span class="keyHint">DEKATI OBJEK</span>`;
+  if(t){ui.target.textContent=t.prompt;ui.target.classList.add('visible');ui.reticle.classList.add('active');}
+  else{ui.target.classList.remove('visible');ui.reticle.classList.remove('active');}
+}
+function canOccupy(x,z){
+  if(game.level===2){const R=LEVEL_LAYOUT.walkableRooms;if(!['ch4A','ch4B','ch4V'].some(n=>{const [x1,x2,z1,z2]=R[n];return x>=x1&&x<=x2&&z>=z1&&z<=z2;}))return false;for(const o of L2_OBS){const c=o.clearance||0;if(x>=o.minX-c&&x<=o.maxX+c&&z>=o.minZ-c&&z<=o.maxZ+c)return false;}return true;}
+  // Every rectangle is a named room in LEVEL_LAYOUT. The emergency tube stays
+  // inaccessible until the pump panel powers its sliding gate.
+  const spaces=Object.entries(LEVEL_LAYOUT.walkableRooms)
+    .filter(([name])=>(name!=='emergencyTunnel'||game.gateOpen)&&!name.startsWith('ch4')&&(!name.startsWith('ch3')||game.doorOpen)&&(name!=='ch3Control'||game.ctlOpen))
+    .map(([,rect])=>rect);
+  if(!spaces.some(([x1,x2,z1,z2])=>x>=x1&&x<=x2&&z>=z1&&z<=z2))return false;
+
+  const p=LEVEL_LAYOUT.portals;
+  // The corridor walls are solid except inside their framed doorway apertures.
+  if(Math.abs(z-p.mainToThroat.z)<p.mainToThroat.halfDepth&&Math.abs(x)>p.mainToThroat.halfWidth)return false;
+  if(Math.abs(z-p.throatToGallery.z)<p.throatToGallery.halfDepth&&Math.abs(x)>p.throatToGallery.halfWidth)return false;
+  for(const door of p.sideDoors){
+    if(Math.abs(x-door.x)<door.halfThickness&&Math.abs(z-door.z)>door.halfOpening)return false;
+  }
+  // Keep the pump/sump equipment and the west-side screen channel physically solid.
+  // These are coarse AABBs for mobile performance, not per-triangle collision.
+  for(const o of LEVEL_LAYOUT.obstacles){
+    const c=o.clearance||0;
+    if(x>=o.minX-c&&x<=o.maxX+c&&z>=o.minZ-c&&z<=o.maxZ+c)return false;
+  }
+  // The west wall's final portal is physically closed until the gate is powered.
+  if(!game.gateOpen&&x< -21.12)return false;
+  if(!game.ctlOpen&&x>33.75)return false;
+  return true;
+}
+function updateMovement(dt){
+  updateDread(dt);audioSystem.tick(dt);updateStalk(dt);updateLamps(dt);
+  if(game.mode!=='playing'||game.action||!input)return;
+  const axis=input.axes(),c=game.camera,ox=c.x,oz=c.z;
+  if(Math.abs(axis.forward)+Math.abs(axis.side)<.06)return;
+  const vx=(Math.sin(c.yaw)*axis.forward+Math.cos(c.yaw)*axis.side)*CONFIG.moveSpeed*dt;
+  const vz=(-Math.cos(c.yaw)*axis.forward+Math.sin(c.yaw)*axis.side)*CONFIG.moveSpeed*dt;
+  const nx=clamp(c.x+vx,CONFIG.worldMinX,CONFIG.worldMaxX),nz=clamp(c.z+vz,CONFIG.worldMinZ,CONFIG.worldMaxZ);
+  if(canOccupy(nx,c.z))c.x=nx;if(canOccupy(c.x,nz))c.z=nz;game.moveTime+=dt*9;game.stepDist+=Math.hypot(c.x-ox,c.z-oz);if(game.stepDist>.8){game.stepDist=0;audioSystem.step(game.level===2&&game.waterOn&&c.x>14.4&&c.x<32.8);}
+  if(game.step==='alternate'&&c.z< -22.8){game.step='explore';objectives.setStep('explore');setNotice('RUANG PERSIMPANGAN · JALUR BARU');}
+  if(game.step==='explore'&&!game.shadowTriggered&&c.z< -22.9&&Math.abs(c.x)<2.8)startLookback();
+  if(game.step==='serviceGate'&&game.gateOpen&&c.x< -21.45){game.step='blockedAccess';objectives.setStep('blockedAccess');setNotice('AKSES DARURAT · UJUNG LORONG');}
+  if(game.level===1&&game.step==='ch5Return'){
+    if(!game.ev3&&c.z>-26&&c.x>-4&&c.x<4){game.ev3=true;startStalk('deep',0,-32.0,'ADA YANG MENGIKUTI');}
+    if(!game.ev4&&c.z>-8&&c.x>-4&&c.x<4){game.ev4=true;dialogue.show([{speaker:'RADIO · ???',text:'Kamu sudah di atas? Ada masalah?'},{speaker:'KAMU',text:'Terus jalan. Jangan dijawab.'}],()=>setMode('playing'));return;}
+  }
+  if(game.level===2&&game.step==='ch4Flood'){
+    if(!game.ev1&&c.x<30){game.ev1=true;startStalk('floodA',32.0,-28.25,'ADA YANG MENGIKUTI');}
+    if(!game.ev2&&c.x<20){game.ev2=true;startScare(()=>{dialogue.show([{speaker:'RADIO · MANDOR',text:'Kamu sudah di atas? Ada masalah?'},{speaker:'KAMU',text:'...Itu bukan suara radioku.'}],()=>{setMode('playing');updateMapMarker();});},-Math.PI/2,'floodB','DI DEPANMU');return;}
+  }
+  updateMapMarker();
+}
+function updateRepair(dt){
+  if(!game.action)return;game.action.time+=dt;const q=clamp(game.action.time/game.action.duration,0,1);ui.progressFill.style.width=`${q*100}%`;
+  if(game.action.id==='drain')game.floodStage=Math.min(2,Math.floor(q*3));
+  if(q>=1&&game.action.id==='drain'){game.action=null;ui.progress.classList.remove('visible');onDrained();return;}
+  if(q>=1){game.action=null;ui.progress.classList.remove('visible');game.repaired=true;objectives.repaired=true;audioSystem.click();dialogue.show([{speaker:'KAMU',text:'Klem terkunci. Sambungannya rapat lagi.'},{speaker:'NARASI',text:'Aliran berhenti. Jalur kembali sunyi, menyisakan bunyi tetesan dari tempat lain.'}],()=>{game.step='exit';objectives.setStep('exit');setMode('playing');});}
+}
+function resetGameWorld(){
+  game.reset();objectives.step='inspect';objectives.waterOn=true;objectives.repaired=false;objectives.pumpPowered=false;objectives.gateOpen=false;objectives.render();
+  ui.endEyebrow.textContent='Saluran 04 · Catatan dihentikan';ui.endTitle.textContent='BERSAMBUNG';ui.endSubtitle.textContent='Dari balik pintu servis terdengar ketukan—dari sisi yang seharusnya berada di luar. Peta fasilitas ini tidak menunjukkan ruangan apa pun di baliknya.';ui.continueExplore.hidden=false;ui.restart.textContent='ULANGI SHIFT';ui.end.hidden=true;ui.menu.hidden=false;ui.hud.hidden=true;ui.hudRight.hidden=true;ui.reticle.hidden=true;ui.dialogue.hidden=true;ui.action.style.display='block';ui.progress.classList.remove('visible');ui.target.classList.remove('visible');ui.action.disabled=true;ui.help.hidden=true;ui.mapOverlay.hidden=true;ui.mapToggle.setAttribute('aria-expanded','false');ui.mapToggle.textContent='PETA';ui.sound.textContent=soundWanted?'SUARA: HIDUP':'SUARA: MATI';ui.menuSound.textContent=soundWanted?'SUARA: HIDUP':'SUARA: MATI';
+}
+async function restartGame(){try{document.getElementById('continueSave').hidden=!readSave();}catch(_){}await audioSystem.setEnabled(false);soundWanted=false;resetGameWorld();}
+let soundWanted=false;
+async function toggleSound(){soundWanted=!soundWanted;ui.sound.textContent=soundWanted?'SUARA: HIDUP':'SUARA: MATI';ui.menuSound.textContent=soundWanted?'SUARA: HIDUP':'SUARA: MATI';await audioSystem.setEnabled(soundWanted);}
+
+/* Fullscreen is user-triggered for Android browser gesture requirements. */
+function renderFullscreenButton(){
+  const active=!!document.fullscreenElement;
+  ui.fullscreen.textContent=active?'⤢ KELUAR LAYAR PENUH':'⛶ LAYAR PENUH';
+  ui.fullscreen.setAttribute('aria-label',active?'Keluar dari layar penuh':'Masuk ke layar penuh');
+}
+async function toggleFullscreen(){
+  try{
+    if(document.fullscreenElement){await document.exitFullscreen();}
+    else if(document.documentElement.requestFullscreen){await document.documentElement.requestFullscreen({navigationUI:'hide'});}
+    else if(document.getElementById('gameRoot').requestFullscreen){await document.getElementById('gameRoot').requestFullscreen();}
+    else{setNotice('Mode layar penuh tidak didukung browser ini. Coba menu browser: Tambahkan ke layar utama.');}
+  }catch(error){setNotice('Browser menolak layar penuh. Coba buka game langsung di Chrome, lalu tekan tombol ini lagi.');}
+  renderFullscreenButton();
+}
+document.addEventListener('fullscreenchange',renderFullscreenButton);
+ui.fullscreen.addEventListener('click',toggleFullscreen);
+
+const rootEl=document.getElementById('gameRoot');let lastDreadVar=-1;
+function updateFX(){rootEl.classList.toggle('scare',!!game.creatureVisible);const d=Math.round(game.dread*50)/50;if(d!==lastDreadVar){lastDreadVar=d;rootEl.style.setProperty('--dread',d);}}
+let lastTime=performance.now();
+function frame(now){
+  const dt=Math.min(.045,Math.max(0,(now-lastTime)/1000));lastTime=now;
+  if(renderer){
+    if(game.mode==='playing'||game.mode==='lookback'){
+      game.elapsed+=dt;
+      if(game.mode==='lookback')updateLookback(dt);
+      else{updateCameraDirection();updateMovement(dt);updateRepair(dt);updateTargetUI();}
+      updateCreatureXform(dt);updateFX();
+      updateCameraDirection();
+      const moving=game.mode==='playing'&&input&&Math.abs(input.axes().forward)+Math.abs(input.axes().side)>.1;
+      const bob=moving?Math.sin(game.moveTime)*.025:0;
+      const shake=game.endingShake>0?Math.sin(game.elapsed*44)*.012*game.endingShake:0;game.endingShake=Math.max(0,game.endingShake-dt*.78);
+      const renderCamera={x:game.camera.x+shake,y:game.camera.y+bob,z:game.camera.z,direction:game.camera.direction};
+      renderer.render(renderCamera,game,game.elapsed);
+    }else{
+      updateCameraDirection();renderer.render(game.camera,game,game.elapsed+now/1000*.06);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+objectives.render();updateMapMarker();
+if(renderer){ui.menu.hidden=false;requestAnimationFrame(frame);}
+</script>
+</body>
+</html>
